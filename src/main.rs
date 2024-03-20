@@ -140,7 +140,7 @@ impl MyApp {
                         let node_data = Node {
                             id: current_node_id.clone(),
                             center: egui::pos2(current_node_pos_x, current_node_pos_y),
-                            radius: 10.0,
+                            radius: 15.0,
                             color: Color32::WHITE,
                         };
                         self.nodes_arc.lock().unwrap().append(&mut vec![node_data]);
@@ -173,7 +173,7 @@ impl eframe::App for MyApp {
             ui.add(egui::Button::new("Izbriši vezu"));
             ui.add(egui::Button::new("Spremi kao novi preset"));
 
-            if ui.button("Open file…").clicked() {
+            if ui.button("Učitaj iz GraphML datoteke").clicked() {
                 if let Some(path) = rfd::FileDialog::new().pick_file() {
                     let path = Some(path.display().to_string());
                     let graphml_file = File::open(path.unwrap()).expect("Otvori GraphML datoteku");
@@ -197,6 +197,10 @@ impl eframe::App for MyApp {
             for node in &*nodes_lock {
                 ui.painter()
                     .circle_filled(node.center, node.radius, node.color);
+                let circle_rect = egui::Rect::from_center_size(node.center, (2.0 * node.radius, 2.0 * node.radius).into());
+                if circle_rect.contains(ui.input(|i| i.pointer.hover_pos().unwrap_or_default())) {
+                    ui.painter().text(node.center, egui::Align2::CENTER_CENTER, node.id.as_str(), egui::FontId::monospace(node.radius), Color32::BLACK);
+                }
             }
         });
     }
