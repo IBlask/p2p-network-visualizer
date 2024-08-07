@@ -9,7 +9,7 @@ use std::thread;
 use std::sync::{Arc, Mutex};
 
 use eframe::egui;
-use egui::{Color32, Stroke};
+use egui::{Align2, Color32, FontId, Pos2, Rect, Stroke, Vec2};
 
 use std::fs::File;
 use std::io::BufReader;
@@ -33,6 +33,7 @@ fn main() -> Result<(), eframe::Error> {
 
 struct Node {
     id: String,
+    name: String,
     center: egui::Pos2,
     radius: f32,
     color: Color32,
@@ -79,10 +80,16 @@ impl MyApp {
     fn parse_graphml(&mut self, reader: BufReader<File>) {
         let parser = EventReader::new(reader);
     
+        self.nodes_arc.lock().unwrap().clear();
+        self.nodes_arc.lock().unwrap().shrink_to_fit();
+        self.links_arc.lock().unwrap().clear();
+        self.links_arc.lock().unwrap().shrink_to_fit();
+
         let mut current_node_id = String::new();
+        let mut current_node_name: String = String::new();
         let mut current_node_pos_x: f32 = 0.0;
         let mut current_node_pos_y: f32 = 0.0;
-        let mut current_pos: char = 'x';
+        let mut current_node_key_type: String = String::new();
         let mut current_source = String::new();
         let mut current_target = String::new();
         let mut id_map = HashMap::new();
@@ -101,12 +108,7 @@ impl MyApp {
                         "data" => {
                             for attr in attributes {
                                 if attr.name.local_name == "key" {
-                                    if attr.value == "d0" {
-                                        current_pos = 'x';
-                                    }
-                                    else if attr.value == "d1" {
-                                        current_pos = 'y';
-                                    }
+                                    current_node_key_type = attr.value;
                                 }
                             }
                         }
@@ -128,10 +130,13 @@ impl MyApp {
                     }
                 }
                 Ok(XmlEvent::Characters(text)) => {
-                    if current_pos == 'x' {
+                    if current_node_key_type == "name" {
+                        current_node_name = text.parse::<String>().unwrap();
+                    }
+                    else if current_node_key_type == "pos_x" {
                         current_node_pos_x = text.parse::<f32>().unwrap();
                     }
-                    else if current_pos == 'y' {
+                    else if current_node_key_type == "pos_y" {
                         current_node_pos_y = text.parse::<f32>().unwrap();
                     }
                 }
@@ -139,6 +144,7 @@ impl MyApp {
                     if name.local_name == "node" {
                         let node_data = Node {
                             id: current_node_id.clone(),
+                            name: current_node_name.clone(),
                             center: egui::pos2(current_node_pos_x, current_node_pos_y),
                             radius: 15.0,
                             color: Color32::WHITE,
@@ -184,27 +190,63 @@ impl eframe::App for MyApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
+            let painter = ui.painter();
+
             let nodes_lock = self.nodes_arc.lock().unwrap();
             let links_lock = self.links_arc.lock().unwrap();
 
+            
+            let mut node_popup_name = String::new();
+            let mut mouse_pos = ctx.input(|i| i.pointer.hover_pos()).unwrap_or_default();
+            let mut is_hovered: bool;
+
             for link in &*links_lock {
-                ui.painter().line_segment(
+                painter.line_segment(
                     [nodes_lock.get(link.node1_index).unwrap().center, nodes_lock.get(link.node2_index).unwrap().center],
                     Stroke::new(1.0, Color32::WHITE),
                 );
             }
 
             for node in &*nodes_lock {
-                ui.painter()
-                    .circle_filled(node.center, node.radius, node.color);
-                let circle_rect = egui::Rect::from_center_size(node.center, (2.0 * node.radius, 2.0 * node.radius).into());
-                if circle_rect.contains(ui.input(|i| i.pointer.hover_pos().unwrap_or_default())) {
-                    ui.painter().text(node.center, egui::Align2::CENTER_CENTER, node.id.as_str(), egui::FontId::monospace(node.radius), Color32::BLACK);
+                painter.circle_filled(node.center, node.radius, node.color);
+
+                mouse_pos = ctx.input(|i| i.pointer.hover_pos()).unwrap_or_default();
+                is_hovered = (mouse_pos - node.center).length() <= node.radius;
+
+                if is_hovered {
+                    node_popup_name = node.name.clone();
                 }
             }
+
+            show_popup(ui, ctx, mouse_pos, &node_popup_name);
         });
     }
 }
+
+
+// Funkcija za prikaz pop-up prozora kada je miš nad čvorom
+fn show_popup(ui: &mut egui::Ui, ctx: &egui::Context, pos: Pos2, text: &str) {
+    let painter = ui.painter();
+
+    let font_id = FontId::proportional(16.0);
+    let text_size = ctx.fonts(|f| f.layout_no_wrap(text.to_string(), font_id.clone(), Color32::BLACK)).size();
+
+    let popup_pos = pos + Vec2::new(10.0, 10.0); // Pozicija pop-up prozora
+
+    painter.rect_filled(
+        Rect::from_min_size(popup_pos, text_size),
+        4.0,
+        Color32::from_white_alpha(200),
+    );
+    painter.text(
+        popup_pos,
+        Align2::LEFT_TOP,
+        text,
+        font_id,
+        Color32::BLACK,
+    );
+}
+
 
 fn tcp_connections(state: Arc<Mutex<State>>, nodes_arc: Arc<Mutex<Vec<Node>>>, links_arc: Arc<Mutex<Vec<Link>>>) {
     let addr = "127.0.0.1:8020".parse().unwrap();
