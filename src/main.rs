@@ -177,15 +177,19 @@ impl eframe::App for MyApp {
             ui.add(egui::Button::new("Izbriši čvor"));
             ui.add(egui::Button::new("Dodaj vezu"));
             ui.add(egui::Button::new("Izbriši vezu"));
-            ui.add(egui::Button::new("Spremi kao novi preset"));
+            ui.add(egui::Button::new("Spremi kao datoteku"));
 
-            if ui.button("Učitaj iz GraphML datoteke").clicked() {
-                if let Some(path) = rfd::FileDialog::new().pick_file() {
-                    let path = Some(path.display().to_string());
-                    let graphml_file = File::open(path.unwrap()).expect("Otvori GraphML datoteku");
-                    let reader = BufReader::new(graphml_file);
-                    MyApp::parse_graphml(self, reader);
-                }
+            if ui.button("Učitaj iz datoteke").clicked() {
+                if let Some(path) = rfd::FileDialog::new()
+                    .add_filter("GraphML & GEXF", &["graphml", "gexf"])
+                    .add_filter("GraphML", &["graphml"])
+                    .add_filter("GEXF", &["gexf"])
+                    .pick_file() {
+                        let path = Some(path.display().to_string());
+                        let graphml_file = File::open(path.unwrap()).expect("Otvori GraphML datoteku");
+                        let reader = BufReader::new(graphml_file);
+                        MyApp::parse_graphml(self, reader);
+                    }
             }
         });
 
@@ -195,7 +199,6 @@ impl eframe::App for MyApp {
             let nodes_lock = self.nodes_arc.lock().unwrap();
             let links_lock = self.links_arc.lock().unwrap();
 
-            
             let mut node_popup_name = String::new();
             let mut mouse_pos = ctx.input(|i| i.pointer.hover_pos()).unwrap_or_default();
             let mut is_hovered: bool;
