@@ -2,7 +2,7 @@ extern crate tokio;
 use std::{sync::{Arc, Mutex}, thread};
 
 use eframe::egui;
-use egui::Color32;
+use egui::{Color32, Pos2};
 
 mod parser;
 mod api;
@@ -22,6 +22,7 @@ fn main() -> Result<(), eframe::Error> {
     )
 }
 
+#[derive(Clone)]
 struct Node {
     id: String,
     name: String,
@@ -30,6 +31,7 @@ struct Node {
     color: Color32,
 }
 
+#[derive(Clone)]
 struct Link {
     node1_index: usize,
     node2_index: usize,
@@ -49,6 +51,12 @@ struct MyApp {
     _state: Arc<Mutex<State>>,
     nodes_arc: Arc<Mutex<Vec<Node>>>,
     links_arc: Arc<Mutex<Vec<Link>>>,
+
+    adding_node: bool,
+    show_input_dialog: bool,
+    new_node_id: String,
+    new_node_name: String,
+    new_node_pos: Pos2,
 }
 
 impl MyApp {
@@ -62,7 +70,16 @@ impl MyApp {
     
         thread::spawn(move || tcp_connections(state_clone, nodes_arc_clone, links_arc_clone));
         
-        Self { _state, nodes_arc: self.nodes_arc.clone(), links_arc: self.links_arc.clone() }
+        Self { 
+            _state, 
+            nodes_arc: self.nodes_arc.clone(), 
+            links_arc: self.links_arc.clone(),
+            adding_node: false,
+            show_input_dialog: false,
+            new_node_id: String::new(),
+            new_node_name: String::new(),
+            new_node_pos: Pos2::default(),
+        }
     }
 }
 
@@ -72,6 +89,11 @@ impl Default for MyApp {
             _state: Arc::new(Mutex::new(State::new())),
             nodes_arc: Arc::new(Mutex::new(Vec::new())),
             links_arc: Arc::new(Mutex::new(Vec::new())),
+            adding_node: false, 
+            show_input_dialog: false,  
+            new_node_id: String::new(), 
+            new_node_name: String::new(),
+            new_node_pos: Pos2::default(),
         }
     }
 }

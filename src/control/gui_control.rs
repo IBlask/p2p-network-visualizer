@@ -1,11 +1,13 @@
 use eframe::egui;
-use egui::Vec2;
+use egui::{Color32, Pos2, Vec2};
 
 use crate::MyApp;
 
 pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
     egui::SidePanel::left("left_panel").show(ctx, |ui| {
-        ui.add(egui::Button::new("Dodaj čvor"));
+        if ui.button("Dodaj čvor").clicked() {
+            app.adding_node = true;
+        }
         ui.add(egui::Button::new("Izbriši čvor"));
         ui.add(egui::Button::new("Dodaj vezu"));
         ui.add(egui::Button::new("Izbriši vezu"));
@@ -13,6 +15,7 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
 
         if ui.button("Učitaj iz datoteke").clicked() {
             if let Some(path) = rfd::FileDialog::new()
+                .set_title("Učitaj iz datoteke")
                 .add_filter("GraphML & GEXF", &["graphml", "gexf"])
                 .add_filter("GraphML", &["graphml"])
                 .add_filter("GEXF", &["gexf"])
@@ -33,30 +36,93 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
 pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
     egui::CentralPanel::default().show(ctx, |ui| {
         let painter = ui.painter();
-
-        let nodes_lock = app.nodes_arc.lock().unwrap();
-        let links_lock = app.links_arc.lock().unwrap();
-
+        let mouse_pos = ctx.input(|i| i.pointer.hover_pos()).unwrap_or_default();
         let mut node_popup_name = String::new();
-        let mut mouse_pos = ctx.input(|i| i.pointer.hover_pos()).unwrap_or_default();
-        let mut is_hovered: bool;
 
-        for link in &*links_lock {
+        // Kopiranje čvorova i minimiziranje zaključavanja 
+        let nodes_lock = app.nodes_arc.lock().unwrap();
+        let nodes: Vec<_> = nodes_lock.clone();
+        drop(nodes_lock);
+
+        // Kopiranje veza i minimiziranje zaključavanja 
+        let links_lock = app.links_arc.lock().unwrap();
+        let links: Vec<_> = links_lock.clone();
+        drop(links_lock);
+
+        // Crtanje veza
+        for link in &*links {
             painter.line_segment(
-                [nodes_lock.get(link.node1_index).unwrap().center, nodes_lock.get(link.node2_index).unwrap().center],
+                [
+                    nodes.get(link.node1_index).unwrap().center,
+                    nodes.get(link.node2_index).unwrap().center
+                ],
                 egui::Stroke::new(1.0, egui::Color32::WHITE),
             );
         }
 
-        for node in &*nodes_lock {
+        // Crtanje čvorova
+        for node in &*nodes {
             painter.circle_filled(node.center, node.radius, node.color);
 
-            mouse_pos = ctx.input(|i| i.pointer.hover_pos()).unwrap_or_default();
-            is_hovered = (mouse_pos - node.center).length() <= node.radius;
-
-            if is_hovered {
+            if (mouse_pos - node.center).length() <= node.radius {
                 node_popup_name = node.name.clone();
             }
+        }
+
+
+        // Dodavanje čvora
+        if app.adding_node {
+            painter.circle_filled(mouse_pos, 15.0, Color32::LIGHT_BLUE); 
+            if ctx.input(|i| i.pointer.primary_clicked()) {
+                app.new_node_pos = mouse_pos;
+                app.show_input_dialog = true;
+                app.adding_node = false; 
+            }
+        }
+
+        // Unos podataka o novom čvoru
+        if app.show_input_dialog {
+            painter.circle_filled(app.new_node_pos, 15.0, Color32::LIGHT_BLUE);
+
+            egui::Window::new("Detalji novog čvora")
+                .collapsible(true)
+                .resizable(false)
+                .show(ctx, |ui| {
+                    ui.label("Unesite ID čvora:");
+                    ui.text_edit_singleline(&mut app.new_node_id);
+
+                    ui.label("Unesite naziv čvora:");
+                    ui.text_edit_singleline(&mut app.new_node_name);
+
+                    ui.add_space(10.0);
+
+                    ui.horizontal(|ui| {
+                        if ui.button("OK").clicked() {
+                            if !app.new_node_id.is_empty() && !app.new_node_name.is_empty() {
+                                let new_node = crate::Node {
+                                    id: app.new_node_id.clone(),
+                                    name: app.new_node_name.clone(),
+                                    center: app.new_node_pos,
+                                    radius: 15.0,
+                                    color: Color32::WHITE,
+                                };
+                                let mut nodes_lock = app.nodes_arc.lock().unwrap();
+                                nodes_lock.push(new_node);
+
+                                app.show_input_dialog = false;
+                                app.new_node_id = String::default();
+                                app.new_node_name = String::default();
+                                app.new_node_pos = Pos2::default();
+                            }
+                        }
+
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if ui.button("Odustani").clicked() {
+                                app.show_input_dialog = false;
+                            }
+                        });
+                    });
+                });
         }
 
         show_popup(ui, ctx, mouse_pos, &node_popup_name);
