@@ -14,7 +14,11 @@ use control::gui_control::{setup_side_panel, render_graph};
 fn main() -> Result<(), eframe::Error> {
     let mut my_app = MyApp::default();
 
-    let options = eframe::NativeOptions::default();
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default().with_inner_size([1280.0, 720.0]),
+        ..Default::default()
+    };
+    
     eframe::run_native(
         "Vizualizator",
         options,
