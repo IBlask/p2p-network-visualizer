@@ -89,16 +89,30 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
                 .resizable(false)
                 .show(ctx, |ui| {
                     ui.label("Unesite ID čvora:");
-                    ui.text_edit_singleline(&mut app.new_node_id);
+                    ui.add(egui::TextEdit::singleline(&mut app.new_node_id).desired_width(ui.available_width()));
 
                     ui.label("Unesite naziv čvora:");
-                    ui.text_edit_singleline(&mut app.new_node_name);
+                    ui.add(egui::TextEdit::singleline(&mut app.new_node_name).desired_width(ui.available_width()));
 
-                    ui.add_space(10.0);
+                    ui.add_space(4.0);
+
+                    // Provjera postoji li već čvor s istim ID-jem ili nazivom
+                    let id_exists = nodes.iter().any(|node| node.id == app.new_node_id);
+                    if id_exists {
+                        ui.colored_label(egui::Color32::RED, "ID čvora mora biti jedinstven! Uneseni ID već postoji.");
+                    }
+                    else if nodes.iter().any(|node| node.name == app.new_node_name) {
+                        ui.colored_label(egui::Color32::RED, "Oprez! Već postoji čvor s istim nazivom.");
+                    }
+                    else {
+                        ui.add_space(17.5);
+                    }
+
+                    ui.add_space(4.0);
 
                     ui.horizontal(|ui| {
                         if ui.button("OK").clicked() {
-                            if !app.new_node_id.is_empty() && !app.new_node_name.is_empty() {
+                            if !app.new_node_id.is_empty() && !app.new_node_name.is_empty() && !id_exists {
                                 let new_node = crate::Node {
                                     id: app.new_node_id.clone(),
                                     name: app.new_node_name.clone(),
