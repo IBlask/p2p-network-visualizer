@@ -53,14 +53,14 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
 
         // Crtanje veza
         for link in &*links {
-            let node1_pos = nodes.iter().position(|n| n.id == link.node1_id);
-            let node2_pos = nodes.iter().position(|n| n.id == link.node2_id);
+            let mut tmp_vec = nodes.clone();
+            tmp_vec.retain(|n| n.id == link.node1_id || n.id == link.node2_id);
 
-            if node1_pos.is_some() && node2_pos.is_some() {
+            if tmp_vec.len() >= 2 {
                 painter.line_segment(
                     [
-                        nodes.get(node1_pos.unwrap()).unwrap().center,
-                        nodes.get(node2_pos.unwrap()).unwrap().center
+                        tmp_vec.get(0).unwrap().center,
+                        tmp_vec.get(1).unwrap().center,
                     ],
                     egui::Stroke::new(1.0, egui::Color32::WHITE),
                 );
