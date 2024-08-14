@@ -50,8 +50,8 @@ pub fn parse_graphml(nodes_arc: &mut Vec<Node>, links_arc: &mut Vec<Link>, reade
                             }
                         }
                         let link_data = Link {
-                            node1_index: *id_map.get(&current_source).unwrap_or(&0),
-                            node2_index: *id_map.get(&current_target).unwrap_or(&0),
+                            node1_id: current_source.clone(),
+                            node2_id: current_target.clone(),
                         };
                         links_arc.push(link_data);
                     }

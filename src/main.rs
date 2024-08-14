@@ -37,8 +37,8 @@ struct Node {
 
 #[derive(Clone)]
 struct Link {
-    node1_index: usize,
-    node2_index: usize,
+    node1_id: String,
+    node2_id: String,
 }
 
 struct State {
@@ -61,6 +61,11 @@ struct MyApp {
     new_node_id: String,
     new_node_name: String,
     new_node_pos: Pos2,
+
+    deleting_node: bool,
+    show_delete_dialog: bool,
+    node_to_delete: Option<Node>,
+    left_click_released: bool,
 }
 
 impl MyApp {
@@ -74,16 +79,7 @@ impl MyApp {
     
         thread::spawn(move || tcp_connections(state_clone, nodes_arc_clone, links_arc_clone));
         
-        Self { 
-            _state, 
-            nodes_arc: self.nodes_arc.clone(), 
-            links_arc: self.links_arc.clone(),
-            adding_node: false,
-            show_input_dialog: false,
-            new_node_id: String::new(),
-            new_node_name: String::new(),
-            new_node_pos: Pos2::default(),
-        }
+        MyApp::default()
     }
 }
 
@@ -98,6 +94,10 @@ impl Default for MyApp {
             new_node_id: String::new(), 
             new_node_name: String::new(),
             new_node_pos: Pos2::default(),
+            deleting_node: false,
+            show_delete_dialog: false,
+            node_to_delete: None,
+            left_click_released: true,
         }
     }
 }

@@ -8,7 +8,9 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
         if ui.button("Dodaj čvor").clicked() {
             app.adding_node = true;
         }
-        ui.add(egui::Button::new("Izbriši čvor"));
+        if ui.button("Izbriši čvor").clicked() {
+            app.deleting_node = true;
+        }
         ui.add(egui::Button::new("Dodaj vezu"));
         ui.add(egui::Button::new("Izbriši vezu"));
         ui.add(egui::Button::new("Spremi kao datoteku"));
@@ -51,13 +53,18 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
 
         // Crtanje veza
         for link in &*links {
-            painter.line_segment(
-                [
-                    nodes.get(link.node1_index).unwrap().center,
-                    nodes.get(link.node2_index).unwrap().center
-                ],
-                egui::Stroke::new(1.0, egui::Color32::WHITE),
-            );
+            let node1_pos = nodes.iter().position(|n| n.id == link.node1_id);
+            let node2_pos = nodes.iter().position(|n| n.id == link.node2_id);
+
+            if node1_pos.is_some() && node2_pos.is_some() {
+                painter.line_segment(
+                    [
+                        nodes.get(node1_pos.unwrap()).unwrap().center,
+                        nodes.get(node2_pos.unwrap()).unwrap().center
+                    ],
+                    egui::Stroke::new(1.0, egui::Color32::WHITE),
+                );
+            }
         }
 
         // Crtanje čvorova
@@ -66,6 +73,23 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
 
             if (mouse_pos - node.center).length() <= node.radius {
                 node_popup_name = node.name.clone();
+
+                // Odabir kod brisanja čvora
+                if app.deleting_node {
+                    if app.left_click_released {
+                        // označavanje crvenom bojom na prijelaz mišem
+                        painter.circle_filled(node.center, node.radius, Color32::RED);
+                    }
+                    if ctx.input(|i| i.pointer.primary_clicked()) {
+                        app.node_to_delete = Some(node.clone());
+                        app.left_click_released = false;
+                        app.show_delete_dialog = true;
+                    }
+                    if ctx.input(|i| i.pointer.primary_released()) {
+                        app.left_click_released = true;
+                        app.deleting_node = false;
+                    }
+                }
             }
         }
 
@@ -138,6 +162,52 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
                     });
                 });
         }
+
+
+        // Brisanje čvora
+        if app.show_delete_dialog {
+            let node_to_delete = app.node_to_delete.clone().unwrap();
+            ui.painter().circle_filled(node_to_delete.center, node_to_delete.radius, Color32::RED);
+
+            if app.left_click_released {
+                // lijeva tipka miša više nije stisnuta
+
+                egui::Window::new("Potvrda brisanja čvora")
+                .collapsible(true)
+                .resizable(false)
+                .show(ctx, |ui| {
+                    ui.label(format!("ID: {}", node_to_delete.id));
+                    ui.label(format!("Naziv: {}", node_to_delete.name));
+                    ui.add_space(10.0);
+
+                    ui.horizontal(|ui| {
+                        if ui.button("Izbriši").clicked() {
+                            let mut nodes_lock = app.nodes_arc.lock().unwrap();
+                            let mut links_lock = app.links_arc.lock().unwrap();
+
+                            // Izbriši čvor i veze
+                            if let Some(node_index) = nodes_lock.iter().position(|n| n.id == node_to_delete.id) {
+                                nodes_lock.remove(node_index);
+
+                                links_lock.retain(|link| {
+                                    link.node1_id != node_to_delete.id && link.node2_id != node_to_delete.id
+                                });
+                            }
+
+                            app.show_delete_dialog = false;
+                            app.node_to_delete = None;
+                        }
+
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if ui.button("Odustani").clicked() {
+                                app.show_delete_dialog = false;
+                            }
+                        });
+                    });
+                });
+            }
+        }
+
 
         show_popup(ui, ctx, mouse_pos, &node_popup_name);
     });
