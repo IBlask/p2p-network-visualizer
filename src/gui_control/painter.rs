@@ -3,7 +3,7 @@ use crate::{Link, MyApp, Node};
 use egui::{Color32, Pos2, Ui, Vec2};
 
 
-pub fn draw_links(ui: &Ui, nodes: &Vec<Node>, links: &Vec<Link>) {
+pub fn draw_links(ui: &Ui, app: &MyApp, nodes: &Vec<Node>, links: &Vec<Link>) {
     for link in &*links {
         let mut tmp_vec = nodes.clone();
         tmp_vec.retain(|n| n.id == link.node1_id || n.id == link.node2_id);
@@ -11,8 +11,8 @@ pub fn draw_links(ui: &Ui, nodes: &Vec<Node>, links: &Vec<Link>) {
         if tmp_vec.len() >= 2 {
             ui.painter().line_segment(
                 [
-                    tmp_vec.get(0).unwrap().center,
-                    tmp_vec.get(1).unwrap().center,
+                    tmp_vec.get(0).unwrap().center + app.mouse_drag_delta,
+                    tmp_vec.get(1).unwrap().center + app.mouse_drag_delta,
                 ],
                 egui::Stroke::new(1.0, egui::Color32::WHITE),
             );
@@ -21,8 +21,9 @@ pub fn draw_links(ui: &Ui, nodes: &Vec<Node>, links: &Vec<Link>) {
 }
 
 
-pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2, nodes: &Vec<Node>) {
-    for node in &*nodes {
+pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2, nodes: &mut Vec<Node>) {
+    for node in &mut *nodes {
+        node.center += app.mouse_drag_delta;
         ui.painter().circle_filled(node.center, node.radius, node.color);
 
         if (mouse_pos - node.center).length() <= node.radius {

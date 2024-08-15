@@ -2,7 +2,7 @@ extern crate tokio;
 use std::{sync::{Arc, Mutex}, thread};
 
 use eframe::egui;
-use egui::{Color32, Pos2};
+use egui::{Color32, Pos2, Vec2};
 
 mod parser;
 mod api;
@@ -56,6 +56,9 @@ struct MyApp {
     nodes_arc: Arc<Mutex<Vec<Node>>>,
     links_arc: Arc<Mutex<Vec<Link>>>,
 
+    dragging: bool,
+    mouse_drag_delta: Vec2,
+
     node_popup_name: Option<String>,
 
     adding_node: bool,
@@ -96,6 +99,9 @@ impl Default for MyApp {
             _state: Arc::new(Mutex::new(State::new())),
             nodes_arc: Arc::new(Mutex::new(Vec::new())),
             links_arc: Arc::new(Mutex::new(Vec::new())),
+
+            dragging: false,
+            mouse_drag_delta: Vec2::default(),
 
             node_popup_name: None,
 

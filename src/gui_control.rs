@@ -51,9 +51,21 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
     egui::CentralPanel::default().show(ctx, |ui| {
         let mouse_pos = ctx.input(|i| i.pointer.hover_pos()).unwrap_or_default();
 
+        // Pomicanje mreže mišem
+        if ctx.input(|i| i.pointer.middle_down()) {
+            if app.dragging {
+                app.mouse_drag_delta += ctx.input(|i| i.pointer.delta());
+            } else {
+                app.dragging = true;
+            }
+        }
+        if ctx.input(|i| i.pointer.any_released()) {
+            app.dragging = false;
+        }
+
         // Kopiranje čvorova i minimiziranje zaključavanja 
         let nodes_lock = app.nodes_arc.lock().unwrap();
-        let nodes: Vec<_> = nodes_lock.clone();
+        let mut nodes: Vec<_> = nodes_lock.clone();
         drop(nodes_lock);
 
         // Kopiranje veza i minimiziranje zaključavanja 
@@ -62,10 +74,10 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
         drop(links_lock);
 
         // Crtanje veza
-        painter::draw_links(ui, &nodes, &links);
+        painter::draw_links(ui, app, &nodes, &links);
 
         // Crtanje čvorova
-        painter::draw_nodes(ui, ctx, app, mouse_pos, &nodes);
+        painter::draw_nodes(ui, ctx, app, mouse_pos, &mut nodes);
 
 
         // Dodavanje čvora
