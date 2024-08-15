@@ -6,10 +6,10 @@ use egui::{Color32, Pos2};
 
 mod parser;
 mod api;
-mod control;
+mod gui_control;
 
 use api::tcp_api::tcp_connections;
-use control::gui_control::{setup_side_panel, render_graph};
+use gui_control::{setup_side_panel, render_graph};
 
 fn main() -> Result<(), eframe::Error> {
     let mut my_app = MyApp::default();
@@ -56,6 +56,8 @@ struct MyApp {
     nodes_arc: Arc<Mutex<Vec<Node>>>,
     links_arc: Arc<Mutex<Vec<Link>>>,
 
+    node_popup_name: Option<String>,
+
     adding_node: bool,
     show_input_dialog: bool,
     new_node_id: String,
@@ -89,6 +91,7 @@ impl Default for MyApp {
             _state: Arc::new(Mutex::new(State::new())),
             nodes_arc: Arc::new(Mutex::new(Vec::new())),
             links_arc: Arc::new(Mutex::new(Vec::new())),
+            node_popup_name: None,
             adding_node: false, 
             show_input_dialog: false,  
             new_node_id: String::new(), 
