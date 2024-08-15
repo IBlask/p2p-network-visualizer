@@ -45,8 +45,8 @@ pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2
                 }
             }
 
-            // Odabir kod dodavanje veze
-            if app.adding_link {
+            // Odabir kod dodavanje i brisanja veze
+            if app.adding_link != app.deleting_link {
                 ui.painter().circle_filled(node.center, node.radius, Color32::YELLOW);
 
                 if ctx.input(|i| i.pointer.primary_clicked()) {

@@ -2,8 +2,8 @@ mod painter;
 mod adding_node;
 mod deleting_node;
 mod adding_link;
+mod deleting_link;
 
-use std::borrow::Borrow;
 
 use crate::MyApp;
 
@@ -21,7 +21,9 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
         if ui.button("Dodaj vezu").clicked() {
             app.adding_link = true;
         }
-        ui.add(egui::Button::new("Izbriši vezu"));
+        if ui.button("Izbriši vezu").clicked() {
+            app.deleting_link = true;
+        }
         ui.add(egui::Button::new("Spremi kao datoteku"));
 
         if ui.button("Učitaj iz datoteke").clicked() {
@@ -60,32 +62,37 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
         drop(links_lock);
 
         // Crtanje veza
-        painter::draw_links(ui.borrow(), &nodes, &links);
+        painter::draw_links(ui, &nodes, &links);
 
         // Crtanje čvorova
-        painter::draw_nodes(ui.borrow(), ctx, app, mouse_pos, &nodes);
+        painter::draw_nodes(ui, ctx, app, mouse_pos, &nodes);
 
 
         // Dodavanje čvora
         if app.adding_node {
-            adding_node::adding_node(ui.borrow(), ctx, app, mouse_pos);
+            adding_node::adding_node(ui, ctx, app, mouse_pos);
         }
 
         // Unos podataka o novom čvoru
         if app.show_input_dialog {
-            adding_node::show_input_dialog(ui.borrow(), ctx, app, &nodes);
+            adding_node::show_input_dialog(ui, ctx, app, &nodes);
         }
 
 
         // Brisanje čvora
         if app.show_delete_dialog {
-            deleting_node::show_delete_dialog(ui.borrow(), ctx, app);
+            deleting_node::show_delete_dialog(ui, ctx, app);
         }
 
 
         // Dodavanje veze
         if app.adding_link {
-            adding_link::adding_link(ui.borrow(), ctx, app);
+            adding_link::adding_link(ui, ctx, app);
+        }
+
+        // Brisanje veze
+        if app.deleting_link {
+            deleting_link::deleting_link(ui, ctx, app);
         }
 
 

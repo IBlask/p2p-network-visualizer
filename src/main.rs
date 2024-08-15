@@ -70,6 +70,7 @@ struct MyApp {
     left_click_released: bool,
 
     adding_link: bool,
+    deleting_link: bool,
     first_node_selected: Option<Node>,
     second_node_selected: Option<Node>
 }
@@ -110,6 +111,7 @@ impl Default for MyApp {
             left_click_released: true,
 
             adding_link: false,
+            deleting_link: false,
             first_node_selected: None,
             second_node_selected: None,
         }
