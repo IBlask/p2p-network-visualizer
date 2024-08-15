@@ -81,7 +81,7 @@ pub fn deleting_link(ui: &egui::Ui, ctx: &egui::Context, app: &mut MyApp) {
                         )
                     });
 
-                    app.adding_link = false;
+                    app.deleting_link = false;
                     app.first_node_selected = None;
                     app.second_node_selected = None;
                 }
