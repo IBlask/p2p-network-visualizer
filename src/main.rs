@@ -68,6 +68,10 @@ struct MyApp {
     show_delete_dialog: bool,
     node_to_delete: Option<Node>,
     left_click_released: bool,
+
+    adding_link: bool,
+    first_node_selected: Option<Node>,
+    second_node_selected: Option<Node>
 }
 
 impl MyApp {
@@ -91,16 +95,23 @@ impl Default for MyApp {
             _state: Arc::new(Mutex::new(State::new())),
             nodes_arc: Arc::new(Mutex::new(Vec::new())),
             links_arc: Arc::new(Mutex::new(Vec::new())),
+
             node_popup_name: None,
+
             adding_node: false, 
             show_input_dialog: false,  
             new_node_id: String::new(), 
             new_node_name: String::new(),
             new_node_pos: Pos2::default(),
+
             deleting_node: false,
             show_delete_dialog: false,
             node_to_delete: None,
             left_click_released: true,
+
+            adding_link: false,
+            first_node_selected: None,
+            second_node_selected: None,
         }
     }
 }

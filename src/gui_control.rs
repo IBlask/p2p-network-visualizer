@@ -1,6 +1,7 @@
 mod painter;
 mod adding_node;
 mod deleting_node;
+mod adding_link;
 
 use std::borrow::Borrow;
 
@@ -17,7 +18,9 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
         if ui.button("Izbriši čvor").clicked() {
             app.deleting_node = true;
         }
-        ui.add(egui::Button::new("Dodaj vezu"));
+        if ui.button("Dodaj vezu").clicked() {
+            app.adding_link = true;
+        }
         ui.add(egui::Button::new("Izbriši vezu"));
         ui.add(egui::Button::new("Spremi kao datoteku"));
 
@@ -79,6 +82,14 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
             deleting_node::show_delete_dialog(ui.borrow(), ctx, app);
         }
 
+
+        // Dodavanje veze
+        if app.adding_link {
+            adding_link::adding_link(ui.borrow(), ctx, app);
+        }
+
+
+        // Popup s nazivom čvora
         if let Some(node_popup_name) = &app.node_popup_name {
             painter::show_popup(&ui, ctx, mouse_pos, node_popup_name.to_string());
             app.node_popup_name = None;

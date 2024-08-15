@@ -44,6 +44,20 @@ pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2
                     app.deleting_node = false;
                 }
             }
+
+            // Odabir kod dodavanje veze
+            if app.adding_link {
+                ui.painter().circle_filled(node.center, node.radius, Color32::YELLOW);
+
+                if ctx.input(|i| i.pointer.primary_clicked()) {
+                    if app.first_node_selected.is_none() {
+                        app.first_node_selected = Some(node.clone());
+                    }
+                    else {
+                        app.second_node_selected = Some(node.clone());
+                    }
+                }
+            }
         }
     }
 }
