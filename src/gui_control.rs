@@ -8,25 +8,33 @@ mod deleting_link;
 use crate::MyApp;
 
 use eframe::egui;
+use egui::Button;
 
 
 pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
     egui::SidePanel::left("left_panel").show(ctx, |ui| {
-        if ui.button("Dodaj čvor").clicked() {
+        let button_size = egui::vec2(ui.available_width(), 20.0);  // Full width, with a fixed height
+
+        if ui.add_sized(button_size, Button::new("Dodaj čvor")).clicked() {
             app.adding_node = true;
         }
-        if ui.button("Izbriši čvor").clicked() {
+        if ui.add_sized(button_size, Button::new("Izbriši čvor")).clicked() {
             app.deleting_node = true;
         }
-        if ui.button("Dodaj vezu").clicked() {
+
+        ui.add_space(20.0);
+
+        if ui.add_sized(button_size, Button::new("Dodaj vezu")).clicked() {
             app.adding_link = true;
         }
-        if ui.button("Izbriši vezu").clicked() {
+        if ui.add_sized(button_size, Button::new("Izbriši vezu")).clicked() {
             app.deleting_link = true;
         }
-        ui.add(egui::Button::new("Spremi kao datoteku"));
 
-        if ui.button("Učitaj iz datoteke").clicked() {
+        ui.add_space(20.0);
+
+        ui.add_sized(button_size, Button::new("Spremi kao datoteku"));
+        if ui.add_sized(button_size, Button::new("Učitaj iz datoteke")).clicked() {
             if let Some(path) = rfd::FileDialog::new()
                 .set_title("Učitaj iz datoteke")
                 .add_filter("GraphML & GEXF", &["graphml", "gexf"])
@@ -44,6 +52,8 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                     );
                 }
         }
+
+        ui.add_space(40.0);
 
         ui.checkbox(&mut app.show_node_names, "Prikaži nazive čvorova");
     });
