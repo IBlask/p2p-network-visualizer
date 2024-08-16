@@ -59,6 +59,7 @@ struct MyApp {
     dragging: bool,
     dragged_node_id: Option<String>,
     mouse_drag_delta: Vec2,
+    zoom: f32,
 
     show_node_names: bool,
     node_popup_name: Option<String>,
@@ -106,6 +107,7 @@ impl Default for MyApp {
             dragging: false,
             dragged_node_id: None,
             mouse_drag_delta: Vec2::default(),
+            zoom: 1.0,
             
             show_node_names: false,
             node_popup_name: None,

@@ -77,6 +77,12 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
             app.dragged_node_id = None;     // pomicanje pojedinog čvora
         }
 
+        // Zoom
+        let scroll_delta = ctx.input(|i| i.scroll_delta.y);
+        if scroll_delta != 0.0 {
+            app.zoom *= 1.0 + scroll_delta * 0.001;
+        }
+
         // Kopiranje čvorova 
         let mut nodes_lock = app.nodes_arc.lock().unwrap();
         let mut nodes: Vec<_> = nodes_lock.clone();
