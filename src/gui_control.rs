@@ -44,6 +44,8 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                     );
                 }
         }
+
+        ui.checkbox(&mut app.show_node_names, "Prikaži nazive čvorova");
     });
 }
 
@@ -83,7 +85,7 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
         let links: Vec<_> = links_lock.clone();
         drop(links_lock);
 
-        
+
         // Crtanje veza
         painter::draw_links(ui, app, &nodes, &links);
 

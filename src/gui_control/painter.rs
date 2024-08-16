@@ -26,6 +26,17 @@ pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2
         node.center += app.mouse_drag_delta;
         ui.painter().circle_filled(node.center, node.radius, node.color);
 
+        // Prikazivanje naziva iznad čvora ako je checkbox označen
+        if app.show_node_names {
+            ui.painter().text(
+                node.center + egui::Vec2::new(0.0, -node.radius - 8.0),
+                egui::Align2::CENTER_CENTER,
+                &node.name,
+                egui::FontId::proportional(14.0),
+                egui::Color32::WHITE,
+            );
+        }
+
         if (mouse_pos - node.center).length() <= node.radius {
             app.node_popup_name = Some(node.name.clone());
 

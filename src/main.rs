@@ -60,6 +60,7 @@ struct MyApp {
     dragged_node_id: Option<String>,
     mouse_drag_delta: Vec2,
 
+    show_node_names: bool,
     node_popup_name: Option<String>,
     node_default_radius: f32,
 
@@ -105,7 +106,8 @@ impl Default for MyApp {
             dragging: false,
             dragged_node_id: None,
             mouse_drag_delta: Vec2::default(),
-
+            
+            show_node_names: false,
             node_popup_name: None,
             node_default_radius: 15.0,
 
