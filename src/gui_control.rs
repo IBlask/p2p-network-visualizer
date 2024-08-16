@@ -37,6 +37,7 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                     let graphml_file = std::fs::File::open(path.unwrap()).expect("Otvori GraphML datoteku");
                     let reader = std::io::BufReader::new(graphml_file);
                     crate::parser::graphml_parser::parse_graphml(
+                        app,
                         &mut app.nodes_arc.lock().unwrap(),
                         &mut app.links_arc.lock().unwrap(),
                         reader,

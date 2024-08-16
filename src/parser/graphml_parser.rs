@@ -4,9 +4,9 @@ use std::io::BufReader;
 
 use xml::reader::{EventReader, XmlEvent};
 
-use crate::{Node, Link};
+use crate::{Link, MyApp, Node};
 
-pub fn parse_graphml(nodes_arc: &mut Vec<Node>, links_arc: &mut Vec<Link>, reader: BufReader<File>) {
+pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec<Link>, reader: BufReader<File>) {
     let parser = EventReader::new(reader);
 
     nodes_arc.clear();
@@ -73,7 +73,7 @@ pub fn parse_graphml(nodes_arc: &mut Vec<Node>, links_arc: &mut Vec<Link>, reade
                         id: current_node_id.clone(),
                         name: current_node_name.clone(),
                         center: egui::pos2(current_node_pos_x, current_node_pos_y),
-                        radius: 15.0,
+                        radius: app.node_default_radius,
                         color: egui::Color32::WHITE,
                     };
                     nodes_arc.push(node_data);

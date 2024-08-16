@@ -4,7 +4,7 @@ use egui::{Color32, Pos2, Ui};
 
 
 pub fn adding_node(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2) {
-    ui.painter().circle_filled(mouse_pos, 15.0, Color32::LIGHT_BLUE); 
+    ui.painter().circle_filled(mouse_pos, app.node_default_radius, Color32::LIGHT_BLUE); 
     if ctx.input(|i| i.pointer.primary_clicked()) {
         app.new_node_pos = mouse_pos;
         app.show_input_dialog = true;
@@ -14,7 +14,7 @@ pub fn adding_node(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos
 
 
 pub fn show_input_dialog(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, nodes: &Vec<Node>) {
-    ui.painter().circle_filled(app.new_node_pos, 15.0, Color32::LIGHT_BLUE);
+    ui.painter().circle_filled(app.new_node_pos, app.node_default_radius, Color32::LIGHT_BLUE);
 
     egui::Window::new("Detalji novog čvora")
         .collapsible(true)
@@ -49,7 +49,7 @@ pub fn show_input_dialog(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, nodes: &
                             id: app.new_node_id.clone(),
                             name: app.new_node_name.clone(),
                             center: app.new_node_pos,
-                            radius: 15.0,
+                            radius: app.node_default_radius,
                             color: Color32::WHITE,
                         };
                         let mut nodes_lock = app.nodes_arc.lock().unwrap();
