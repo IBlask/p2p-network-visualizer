@@ -61,12 +61,21 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
             }
         }
         if ctx.input(|i| i.pointer.any_released()) {
-            app.dragging = false;
+            app.dragging = false;           // pomicanje cijele mreže
+            app.dragged_node_id = None;     // pomicanje pojedinog čvora
         }
 
-        // Kopiranje čvorova i minimiziranje zaključavanja 
-        let nodes_lock = app.nodes_arc.lock().unwrap();
+        // Kopiranje čvorova 
+        let mut nodes_lock = app.nodes_arc.lock().unwrap();
         let mut nodes: Vec<_> = nodes_lock.clone();
+        // Pomicanje pojedinih čvorova
+        if let Some(dragged_node_id) = &app.dragged_node_id {
+            if let Some(node) = nodes_lock.iter_mut().find(|node| &node.id == dragged_node_id) {
+                let delta = ctx.input(|i| i.pointer.delta());
+                node.center += delta;
+            }
+        }
+        // Minimiziranje zaključavanja
         drop(nodes_lock);
 
         // Kopiranje veza i minimiziranje zaključavanja 
@@ -74,6 +83,7 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
         let links: Vec<_> = links_lock.clone();
         drop(links_lock);
 
+        
         // Crtanje veza
         painter::draw_links(ui, app, &nodes, &links);
 

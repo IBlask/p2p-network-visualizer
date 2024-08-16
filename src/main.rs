@@ -57,6 +57,7 @@ struct MyApp {
     links_arc: Arc<Mutex<Vec<Link>>>,
 
     dragging: bool,
+    dragged_node_id: Option<String>,
     mouse_drag_delta: Vec2,
 
     node_popup_name: Option<String>,
@@ -102,6 +103,7 @@ impl Default for MyApp {
             links_arc: Arc::new(Mutex::new(Vec::new())),
 
             dragging: false,
+            dragged_node_id: None,
             mouse_drag_delta: Vec2::default(),
 
             node_popup_name: None,
