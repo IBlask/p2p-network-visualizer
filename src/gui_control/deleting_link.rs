@@ -31,6 +31,7 @@ pub fn deleting_link(ui: &egui::Ui, ctx: &egui::Context, app: &mut MyApp) {
     egui::Window::new("Izbriši vezu")
         .collapsible(true)
         .resizable(false)
+        .default_pos(egui::pos2(app.left_side_panel_width + 10.0, 10.0))
         .show(ctx, |ui| {
             ui.label("Prvi čvor");
             ui.label(

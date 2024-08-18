@@ -56,6 +56,8 @@ struct MyApp {
     nodes_arc: Arc<Mutex<Vec<Node>>>,
     links_arc: Arc<Mutex<Vec<Link>>>,
 
+    left_side_panel_width: f32,
+
     dragging: bool,
     dragged_node_id: Option<String>,
     mouse_drag_delta: Vec2,
@@ -103,6 +105,8 @@ impl Default for MyApp {
             _state: Arc::new(Mutex::new(State::new())),
             nodes_arc: Arc::new(Mutex::new(Vec::new())),
             links_arc: Arc::new(Mutex::new(Vec::new())),
+
+            left_side_panel_width: 200.0,
 
             dragging: false,
             dragged_node_id: None,

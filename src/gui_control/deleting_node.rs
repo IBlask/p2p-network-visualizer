@@ -13,6 +13,7 @@ pub fn show_delete_dialog(ui: &Ui, ctx: &egui::Context, app: &mut MyApp) {
         egui::Window::new("Potvrda brisanja čvora")
         .collapsible(true)
         .resizable(false)
+        .default_pos(egui::pos2(app.left_side_panel_width + 10.0, 10.0))
         .show(ctx, |ui| {
             ui.label(format!("ID: {}", node_to_delete.id));
             ui.label(format!("Naziv: {}", node_to_delete.name));

@@ -19,6 +19,7 @@ pub fn show_input_dialog(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, nodes: &
     egui::Window::new("Detalji novog čvora")
         .collapsible(true)
         .resizable(false)
+        .default_pos(egui::pos2(app.left_side_panel_width + 10.0, 10.0))
         .show(ctx, |ui| {
             ui.label("Unesite ID čvora:");
             ui.add(egui::TextEdit::singleline(&mut app.new_node_id).desired_width(ui.available_width()));

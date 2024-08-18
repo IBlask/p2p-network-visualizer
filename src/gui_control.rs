@@ -12,52 +12,64 @@ use egui::Button;
 
 
 pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
-    egui::SidePanel::left("left_panel").show(ctx, |ui| {
-        let button_size = egui::vec2(ui.available_width(), 20.0);  // Full width, with a fixed height
+    egui::Area::new("side_panel")
+        .order(egui::Order::Foreground)
+        .fixed_pos(egui::pos2(0.0, 0.0))
+        .show(ctx, |ui| {
+            egui::Frame::default()
+                .fill(egui::Color32::from_rgb(40, 40, 40))
+                .show(ui, |ui| {
+                    ui.set_width(200.0);
+                    ui.set_height(ui.available_height());
 
-        if ui.add_sized(button_size, Button::new("Dodaj čvor")).clicked() {
-            app.adding_node = true;
-        }
-        if ui.add_sized(button_size, Button::new("Izbriši čvor")).clicked() {
-            app.deleting_node = true;
-        }
+                    let button_size = egui::vec2(ui.available_width(), 20.0);  // Full width, with a fixed height
 
-        ui.add_space(20.0);
+                    if ui.add_sized(button_size, Button::new("Dodaj čvor")).clicked() {
+                        app.adding_node = true;
+                    }
+                    if ui.add_sized(button_size, Button::new("Izbriši čvor")).clicked() {
+                        app.deleting_node = true;
+                    }
 
-        if ui.add_sized(button_size, Button::new("Dodaj vezu")).clicked() {
-            app.adding_link = true;
-        }
-        if ui.add_sized(button_size, Button::new("Izbriši vezu")).clicked() {
-            app.deleting_link = true;
-        }
+                    ui.add_space(20.0);
 
-        ui.add_space(20.0);
+                    if ui.add_sized(button_size, Button::new("Dodaj vezu")).clicked() {
+                        app.adding_link = true;
+                    }
+                    if ui.add_sized(button_size, Button::new("Izbriši vezu")).clicked() {
+                        app.deleting_link = true;
+                    }
 
-        ui.add_sized(button_size, Button::new("Spremi kao datoteku"));
-        if ui.add_sized(button_size, Button::new("Učitaj iz datoteke")).clicked() {
-            if let Some(path) = rfd::FileDialog::new()
-                .set_title("Učitaj iz datoteke")
-                .add_filter("GraphML & GEXF", &["graphml", "gexf"])
-                .add_filter("GraphML", &["graphml"])
-                .add_filter("GEXF", &["gexf"])
-                .pick_file() {
-                    let path = Some(path.display().to_string());
-                    let graphml_file = std::fs::File::open(path.unwrap()).expect("Otvori GraphML datoteku");
-                    let reader = std::io::BufReader::new(graphml_file);
-                    crate::parser::graphml_parser::parse_graphml(
-                        app,
-                        &mut app.nodes_arc.lock().unwrap(),
-                        &mut app.links_arc.lock().unwrap(),
-                        reader,
-                    );
-                }
-        }
+                    ui.add_space(20.0);
 
-        ui.add_space(40.0);
+                    ui.add_sized(button_size, Button::new("Spremi kao datoteku"));
+                    if ui.add_sized(button_size, Button::new("Učitaj iz datoteke")).clicked() {
+                        if let Some(path) = rfd::FileDialog::new()
+                            .set_title("Učitaj iz datoteke")
+                            .add_filter("GraphML & GEXF", &["graphml", "gexf"])
+                            .add_filter("GraphML", &["graphml"])
+                            .add_filter("GEXF", &["gexf"])
+                            .pick_file() {
+                                let path = Some(path.display().to_string());
+                                let graphml_file = std::fs::File::open(path.unwrap()).expect("Otvori GraphML datoteku");
+                                let reader = std::io::BufReader::new(graphml_file);
+                                crate::parser::graphml_parser::parse_graphml(
+                                    app,
+                                    &mut app.nodes_arc.lock().unwrap(),
+                                    &mut app.links_arc.lock().unwrap(),
+                                    reader,
+                                );
+                            }
+                    }
 
-        ui.checkbox(&mut app.show_node_names, "Prikaži nazive čvorova");
-    });
+                    ui.add_space(40.0);
+
+                    ui.checkbox(&mut app.show_node_names, "Prikaži nazive čvorova");
+                
+                });
+        });
 }
+
 
 
 pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
