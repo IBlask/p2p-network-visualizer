@@ -42,7 +42,7 @@ pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2
             app.node_popup_name = Some(node.name.clone());
 
             // Pomicanje čvora
-            if ctx.input(|i| i.pointer.primary_down()) {
+            if ctx.input(|i| i.pointer.primary_down()) && app.dragged_node_id.is_none() {
                 app.dragged_node_id = Some(node.id.clone());
             }
 
