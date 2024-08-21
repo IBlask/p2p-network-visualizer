@@ -14,11 +14,8 @@ pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec
     links_arc.clear();
     links_arc.shrink_to_fit();
 
-    let mut current_node_id = String::new();
-    let mut current_node_name = String::new();
-    let mut current_node_pos_x = 0.0;
-    let mut current_node_pos_y = 0.0;
-    let mut current_node_key_type = String::new();
+    let mut new_node = Node::new();
+    let mut current_key_type = String::new();
     let mut current_source = String::new();
     let mut current_target = String::new();
     let mut id_map = HashMap::new();
@@ -28,16 +25,17 @@ pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec
             Ok(XmlEvent::StartElement { name, attributes, .. }) => {
                 match name.local_name.as_str() {
                     "node" => {
+                        new_node = Node::new();
                         for attr in attributes {
                             if attr.name.local_name == "id" {
-                                current_node_id = attr.value.clone();
+                                new_node.id = attr.value.clone();
                             }
                         }
                     }
                     "data" => {
                         for attr in attributes {
                             if attr.name.local_name == "key" {
-                                current_node_key_type = attr.value;
+                                current_key_type = attr.value.clone();
                             }
                         }
                     }
@@ -59,32 +57,27 @@ pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec
                 }
             }
             Ok(XmlEvent::Characters(text)) => {
-                if current_node_key_type == "name" {
-                    current_node_name = text.parse::<String>().unwrap();
-                } else if current_node_key_type == "pos_x" {
-                    current_node_pos_x = text.parse::<f32>().unwrap();
-                } else if current_node_key_type == "pos_y" {
-                    current_node_pos_y = text.parse::<f32>().unwrap();
+                match current_key_type.as_str() {
+                    "name" => new_node.name = text,
+                    "pos_x" => new_node.center.x = text.parse::<f32>().unwrap(),
+                    "pos_y" => new_node.center.y = text.parse::<f32>().unwrap(),
+                    "ip_addr" => new_node.ip_addr = text,
+                    "cpu" => new_node.cpu = text,
+                    "ram" => new_node.ram = text,
+                    "rom" => new_node.rom = text,
+                    "os" => new_node.os = text,
+                    "network_bw" => new_node.network_bw = text,
+                    "software" => new_node.software = text,
+                    _ => {}
                 }
             }
             Ok(XmlEvent::EndElement { name }) => {
                 if name.local_name == "node" {
-                    let node_data = Node {
-                        id: current_node_id.clone(),
-                        name: current_node_name.clone(),
-                        center: egui::pos2(current_node_pos_x, current_node_pos_y),
-                        radius: app.node_default_radius,
-                        color: egui::Color32::WHITE,
-                        ip_addr: String::default(),
-                        ram: String::default(),
-                        cpu: String::default(),
-                        rom: String::default(),
-                        os: String::default(),
-                        network_bw: String::default(),
-                        software: String::default(),
-                    };
-                    nodes_arc.push(node_data);
-                    id_map.insert(current_node_id.clone(), nodes_arc.len() - 1);
+                    new_node.radius = app.node_default_radius;
+                    new_node.color = egui::Color32::WHITE;
+
+                    nodes_arc.push(new_node.clone());
+                    id_map.insert(new_node.id.clone(), nodes_arc.len() - 1);
                 }
             }
             _ => {}
