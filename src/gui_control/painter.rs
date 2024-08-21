@@ -77,6 +77,11 @@ pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2
                 }
             }
         }
+
+        // konstantno prikazuj popup kod pomicanja čvora
+        if app.dragged_node_id.is_some() && app.dragged_node_id.clone().unwrap() == node.id {
+            app.node_popup = Some(node.clone());
+        }
     }
 }
 

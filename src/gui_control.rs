@@ -103,7 +103,7 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
         if let Some(dragged_node_id) = &app.dragged_node_id {
             if let Some(node) = nodes_lock.iter_mut().find(|node| &node.id == dragged_node_id) {
                 let delta = ctx.input(|i| i.pointer.delta());
-                node.center += delta;
+                node.center = node.center + delta / app.zoom;
             }
         }
         // Minimiziranje zaključavanja
