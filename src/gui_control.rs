@@ -19,10 +19,10 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
             egui::Frame::default()
                 .fill(egui::Color32::from_rgb(40, 40, 40))
                 .show(ui, |ui| {
-                    ui.set_width(200.0);
+                    ui.set_width(app.left_side_panel_width);
                     ui.set_height(ui.available_height());
 
-                    let button_size = egui::vec2(ui.available_width(), 20.0);  // Full width, with a fixed height
+                    let button_size = egui::vec2(ui.available_width(), 30.0);  // Full width, with a fixed height
 
                     if ui.add_sized(button_size, Button::new("Dodaj čvor")).clicked() {
                         app.adding_node = true;

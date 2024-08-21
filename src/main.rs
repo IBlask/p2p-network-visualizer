@@ -142,7 +142,7 @@ impl Default for MyApp {
             nodes_arc: Arc::new(Mutex::new(Vec::new())),
             links_arc: Arc::new(Mutex::new(Vec::new())),
 
-            left_side_panel_width: 200.0,
+            left_side_panel_width: 180.0,
 
             dragging: false,
             dragged_node_id: None,
