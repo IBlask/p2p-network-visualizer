@@ -150,10 +150,10 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
         }
 
 
-        // Popup s nazivom čvora
-        if let Some(node_popup_name) = &app.node_popup_name {
-            painter::show_popup(&ui, ctx, mouse_pos, node_popup_name.to_string());
-            app.node_popup_name = None;
+        // Popup s detaljima čvora
+        if app.node_popup.is_some() {
+            painter::show_popup(&ui, ctx, mouse_pos, app);
+            app.node_popup = None;
         }
     });
 }

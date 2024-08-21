@@ -39,7 +39,7 @@ pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2
         }
 
         if (mouse_pos - node.center).length() <= node.radius {
-            app.node_popup_name = Some(node.name.clone());
+            app.node_popup = Some(node.clone());
 
             // Pomicanje čvora
             if ctx.input(|i| i.pointer.primary_down()) && app.dragged_node_id.is_none() {
@@ -81,21 +81,36 @@ pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2
 }
 
 
-pub fn show_popup(ui: &egui::Ui, ctx: &egui::Context, pos: egui::Pos2, text: String) {
+pub fn show_popup(ui: &egui::Ui, ctx: &egui::Context, pos: egui::Pos2, app: &MyApp) {
     let painter = ui.painter();
+    let node = app.node_popup.clone().unwrap();
+
+    let text =
+        node.name + "\n\n"
+        + "ID: " + &node.id + "\n"
+        + "IP adresa: " + &node.ip_addr + "\n"
+        + "CPU: " + &node.cpu + "\n"
+        + "RAM: " + &node.ram + "\n"
+        + "ROM: " + &node.rom + "\n"
+        + "Propusnost: " + &node.network_bw + "\n"
+        + "OS: " + &node.os + "\n"
+        + "Software: " + &node.software;
 
     let font_id = egui::FontId::proportional(16.0);
     let text_size = ctx.fonts(|f| f.layout_no_wrap(text.to_string(), font_id.clone(), egui::Color32::BLACK)).size();
 
+    let margin = 6.0;
+    let rect_size = text_size + Vec2::new(margin * 2.0, margin * 2.0);
+
     let popup_pos = pos + Vec2::new(10.0, 10.0);
 
     painter.rect_filled(
-        egui::Rect::from_min_size(popup_pos, text_size),
+        egui::Rect::from_min_size(popup_pos, rect_size),
         4.0,
         egui::Color32::from_white_alpha(200),
     );
     painter.text(
-        popup_pos,
+        popup_pos + Vec2::new(margin, margin),
         egui::Align2::LEFT_TOP,
         text,
         font_id,

@@ -101,7 +101,7 @@ struct MyApp {
     zoom: f32,
 
     show_node_names: bool,
-    node_popup_name: Option<String>,
+    node_popup: Option<Node>,
     node_default_radius: f32,
 
     adding_node: bool,
@@ -150,7 +150,7 @@ impl Default for MyApp {
             zoom: 1.0,
             
             show_node_names: false,
-            node_popup_name: None,
+            node_popup: None,
             node_default_radius: 15.0,
 
             adding_node: false, 
