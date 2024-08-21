@@ -33,7 +33,44 @@ struct Node {
     center: egui::Pos2,
     radius: f32,
     color: Color32,
+    ip_addr: String,
+    cpu: String,
+    ram: String,
+    rom: String,
+    os: String,
+    network_bw: String,
+    software: String,
 }
+
+impl Node {
+    fn new() -> Self {
+        Self {
+            id: String::new(),
+            name: String::new(),
+            center: egui::Pos2::default(),
+            radius: 0.0,
+            color: egui::Color32::WHITE,
+            ip_addr: String::new(),
+            cpu: String::new(),
+            ram: String::new(),
+            rom: String::new(),
+            os: String::new(),
+            network_bw: String::new(),
+            software: String::new(),
+        }
+    }
+
+    fn set_pos(&mut self, pos: Pos2) -> &mut Self {
+        self.center = pos;
+        self
+    }
+
+    fn set_radius(&mut self, radius: f32) -> &mut Self {
+        self.radius = radius;
+        self
+    }
+}
+
 
 #[derive(Clone)]
 struct Link {
@@ -68,9 +105,8 @@ struct MyApp {
     node_default_radius: f32,
 
     adding_node: bool,
+    new_node: Node,
     show_input_dialog: bool,
-    new_node_id: String,
-    new_node_name: String,
     new_node_pos: Pos2,
 
     deleting_node: bool,
@@ -118,9 +154,8 @@ impl Default for MyApp {
             node_default_radius: 15.0,
 
             adding_node: false, 
-            show_input_dialog: false,  
-            new_node_id: String::new(), 
-            new_node_name: String::new(),
+            new_node: Node::new(),
+            show_input_dialog: false,
             new_node_pos: Pos2::default(),
 
             deleting_node: false,

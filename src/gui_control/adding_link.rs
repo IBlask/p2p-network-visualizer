@@ -1,16 +1,10 @@
 use crate::{Link, MyApp, Node};
 
-use egui::{Color32, Pos2};
+use egui::Color32;
 
 
 pub fn adding_link(ui: &egui::Ui, ctx: &egui::Context, app: &mut MyApp) {
-    let n = Node {
-        id: String::from(""), 
-        name: String::from(""), 
-        center: Pos2::default(), 
-        radius: 0.0, 
-        color: Color32::default()
-    };
+    let n = Node::new();
 
     let first_node = app.first_node_selected.clone().unwrap_or(n.clone());
     let second_node = app.second_node_selected.clone().unwrap_or(n);

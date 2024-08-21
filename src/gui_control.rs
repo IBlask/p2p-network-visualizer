@@ -5,7 +5,7 @@ mod adding_link;
 mod deleting_link;
 
 
-use crate::MyApp;
+use crate::{MyApp, Node};
 
 use eframe::egui;
 use egui::Button;
@@ -26,6 +26,7 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
 
                     if ui.add_sized(button_size, Button::new("Dodaj čvor")).clicked() {
                         app.adding_node = true;
+                        app.new_node = Node::new();
                     }
                     if ui.add_sized(button_size, Button::new("Izbriši čvor")).clicked() {
                         app.deleting_node = true;
