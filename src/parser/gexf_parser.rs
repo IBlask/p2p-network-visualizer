@@ -10,7 +10,7 @@ fn scale_float_to_int(value: f32) -> i32 {
     (value * 1000.0).round() as i32
 }
 
-pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec<Link>, reader: BufReader<File>) -> Result<bool, String> {
+pub fn parse_gexf(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec<Link>, reader: BufReader<File>) -> Result<bool, String> {
     let parser = EventReader::new(reader);
 
     nodes_arc.clear();
@@ -46,12 +46,30 @@ pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec
                                     return Err("Učitana datoteka sadržava više čvorova s istom ID oznakom. ID mora biti jedinstven za svaki čvor!".to_string());
                                 }
                             }
+                            if attr.name.local_name == "label" {
+                                new_node.name = attr.value.clone();
+                            }
                         }
                     }
-                    "data" => {
+                    "attvalue" => {
                         for attr in attributes {
-                            if attr.name.local_name == "key" {
-                                current_key_type = attr.value.clone();
+                            match attr.name.local_name.as_str() {
+                                "for" => current_key_type = attr.value.clone(),
+                                "value" => {
+                                    match current_key_type.as_str() {
+                                        "pos_x" => new_node.center.x = attr.value.parse::<f32>().unwrap(),
+                                        "pos_y" => new_node.center.y = attr.value.parse::<f32>().unwrap(),
+                                        "ip_addr" => new_node.ip_addr = attr.value.clone(),
+                                        "cpu" => new_node.cpu = attr.value.clone(),
+                                        "ram" => new_node.ram = attr.value.clone(),
+                                        "rom" => new_node.rom = attr.value.clone(),
+                                        "os" => new_node.os = attr.value.clone(),
+                                        "network_bw" => new_node.network_bw = attr.value.clone(),
+                                        "software" => new_node.software = attr.value.clone(),
+                                        _ => {}
+                                    }
+                                }
+                                _ => {}
                             }
                         }
                     }
@@ -70,21 +88,6 @@ pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec
                         };
                         links_arc.push(link_data);
                     }
-                    _ => {}
-                }
-            }
-            Ok(XmlEvent::Characters(text)) => {
-                match current_key_type.as_str() {
-                    "name" => new_node.name = text,
-                    "pos_x" => new_node.center.x = text.parse::<f32>().unwrap(),
-                    "pos_y" => new_node.center.y = text.parse::<f32>().unwrap(),
-                    "ip_addr" => new_node.ip_addr = text,
-                    "cpu" => new_node.cpu = text,
-                    "ram" => new_node.ram = text,
-                    "rom" => new_node.rom = text,
-                    "os" => new_node.os = text,
-                    "network_bw" => new_node.network_bw = text,
-                    "software" => new_node.software = text,
                     _ => {}
                 }
             }
@@ -107,8 +110,6 @@ pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec
         }
     }
 
-
-    
     // Čvorovi bez zadane pozicije
     let mut new_positions: Vec<(usize, f32, f32)> = Vec::new();
 

@@ -71,6 +71,7 @@ pub fn show_input_dialog(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, nodes: &
                                     .set_radius(app.node_default_radius);
 
                         if let Ok(mut nodes_lock) = app.nodes_arc.lock() {
+                            
                             nodes_lock.push(app.new_node.clone());
 
                             app.show_input_dialog = false;

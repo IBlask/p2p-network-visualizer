@@ -100,7 +100,8 @@ struct MyApp {
     mouse_drag_delta: Vec2,
     zoom: f32,
 
-    show_duplicate_node_popup: bool,
+    show_error: bool,
+    error_message: String,
 
     show_node_names: bool,
     node_popup: Option<Node>,
@@ -156,7 +157,8 @@ impl Default for MyApp {
             mouse_drag_delta: Vec2::default(),
             zoom: 1.0,
 
-            show_duplicate_node_popup: false,
+            show_error: false,
+            error_message: String::default(),
             
             show_node_names: false,
             node_popup: None,

@@ -59,19 +59,21 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                             .add_filter("GraphML", &["graphml"])
                             .add_filter("GEXF", &["gexf"])
                             .pick_file() {
-                                let path = Some(path.display().to_string());
-                                let graphml_file = std::fs::File::open(path.unwrap()).expect("Otvori GraphML datoteku");
-                                let reader = std::io::BufReader::new(graphml_file);
+                                let path_str = path.display().to_string();
 
-                                if crate::parser::graphml_parser::parse_graphml(
+                                match crate::parser::parse_file(
                                     app,
                                     &mut app.nodes_arc.lock().unwrap(),
                                     &mut app.links_arc.lock().unwrap(),
-                                    reader,
+                                    &path_str,
                                 ) {
-                                    app.show_duplicate_node_popup = true;
-                                };
-                            }
+                                    Ok(_success) => {}
+                                    Err(error_message) => {
+                                        app.show_error = true;
+                                        app.error_message = error_message;
+                                    }
+                                }
+                        }
                     }
 
                     ui.add_space(40.0);
@@ -88,7 +90,7 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
     egui::CentralPanel::default().show(ctx, |ui| {
 
         // ako je došlo do greške na parseru - pokaži popup
-        if app.show_duplicate_node_popup {
+        if app.show_error {
             egui::Window::new("Greška")
             .collapsible(false)
             .resizable(false)
@@ -96,9 +98,9 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
             .show(ui.ctx(), |ui| {
                 ui.colored_label(
                     Color32::RED, 
-                    "Učitana datoteka sadržava više čvorova s istom ID oznakom. ID mora biti jedinstven za svaki čvor!");
+                    app.error_message.clone());
                 if ui.button("OK").clicked() {
-                    app.show_duplicate_node_popup = false;
+                    app.show_error = false;
                 }
             });
             return;
