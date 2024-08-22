@@ -100,6 +100,8 @@ struct MyApp {
     mouse_drag_delta: Vec2,
     zoom: f32,
 
+    show_duplicate_node_popup: bool,
+
     show_node_names: bool,
     node_popup: Option<Node>,
     node_default_radius: f32,
@@ -117,7 +119,9 @@ struct MyApp {
     adding_link: bool,
     deleting_link: bool,
     first_node_selected: Option<Node>,
-    second_node_selected: Option<Node>
+    second_node_selected: Option<Node>,
+
+    node_editing: bool,
 }
 
 impl MyApp {
@@ -148,6 +152,8 @@ impl Default for MyApp {
             dragged_node_id: None,
             mouse_drag_delta: Vec2::default(),
             zoom: 1.0,
+
+            show_duplicate_node_popup: false,
             
             show_node_names: false,
             node_popup: None,
@@ -167,6 +173,8 @@ impl Default for MyApp {
             deleting_link: false,
             first_node_selected: None,
             second_node_selected: None,
+
+            node_editing: false,
         }
     }
 }

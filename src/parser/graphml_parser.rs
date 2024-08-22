@@ -10,7 +10,7 @@ fn scale_float_to_int(value: f32) -> i32 {
     (value * 1000.0).round() as i32
 }
 
-pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec<Link>, reader: BufReader<File>) {
+pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec<Link>, reader: BufReader<File>) -> bool {
     let parser = EventReader::new(reader);
 
     nodes_arc.clear();
@@ -36,6 +36,15 @@ pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec
                         for attr in attributes {
                             if attr.name.local_name == "id" {
                                 new_node.id = attr.value.clone();
+
+                                // ako ID postoji - javi grešku
+                                if id_map.contains_key(&new_node.id) {
+                                    nodes_arc.clear();
+                                    nodes_arc.shrink_to_fit();
+                                    links_arc.clear();
+                                    links_arc.shrink_to_fit();
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -154,4 +163,6 @@ pub fn parse_graphml(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec
         node.center.x = pos_x;
         node.center.y = pos_y;
     }
+
+    return false;
 }

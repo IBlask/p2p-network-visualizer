@@ -5,10 +5,11 @@ mod adding_link;
 mod deleting_link;
 
 
+
 use crate::{MyApp, Node};
 
 use eframe::egui;
-use egui::Button;
+use egui::{Button, Color32};
 
 
 pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
@@ -54,12 +55,15 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                                 let path = Some(path.display().to_string());
                                 let graphml_file = std::fs::File::open(path.unwrap()).expect("Otvori GraphML datoteku");
                                 let reader = std::io::BufReader::new(graphml_file);
-                                crate::parser::graphml_parser::parse_graphml(
+
+                                if crate::parser::graphml_parser::parse_graphml(
                                     app,
                                     &mut app.nodes_arc.lock().unwrap(),
                                     &mut app.links_arc.lock().unwrap(),
                                     reader,
-                                );
+                                ) {
+                                    app.show_duplicate_node_popup = true;
+                                };
                             }
                     }
 
@@ -75,6 +79,25 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
 
 pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
     egui::CentralPanel::default().show(ctx, |ui| {
+
+        // ako je došlo do greške na parseru - pokaži popup
+        if app.show_duplicate_node_popup {
+            egui::Window::new("Greška")
+            .collapsible(false)
+            .resizable(false)
+            .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+            .show(ui.ctx(), |ui| {
+                ui.colored_label(
+                    Color32::RED, 
+                    "Učitana datoteka sadržava više čvorova s istom ID oznakom. ID mora biti jedinstven za svaki čvor!");
+                if ui.button("OK").clicked() {
+                    app.show_duplicate_node_popup = false;
+                }
+            });
+            return;
+        }
+
+        // Očitanje pozicije miša
         let mouse_pos = ctx.input(|i| i.pointer.hover_pos()).unwrap_or_default();
 
         // Pomicanje mreže mišem
