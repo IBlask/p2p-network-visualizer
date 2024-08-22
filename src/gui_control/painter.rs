@@ -76,6 +76,14 @@ pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2
                     }
                 }
             }
+
+            // Odabir kod uređivanja atributa čvora
+            if app.node_editing && app.node_to_edit.is_none() {
+                ui.painter().circle_filled(node.center, node.radius, Color32::BLUE);
+                if ctx.input(|i| i.pointer.primary_clicked()) {
+                    app.node_to_edit = Some(node.clone());
+                }
+            }
         }
 
         // konstantno prikazuj popup kod pomicanja čvora

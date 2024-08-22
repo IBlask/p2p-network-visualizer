@@ -3,6 +3,7 @@ mod adding_node;
 mod deleting_node;
 mod adding_link;
 mod deleting_link;
+mod editing_node;
 
 
 
@@ -40,6 +41,12 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                     }
                     if ui.add_sized(button_size, Button::new("Izbriši vezu")).clicked() {
                         app.deleting_link = true;
+                    }
+
+                    ui.add_space(20.0);
+
+                    if ui.add_sized(button_size, Button::new("Uredi detalje čvora")).clicked() {
+                        app.node_editing = true;
                     }
 
                     ui.add_space(20.0);
@@ -170,6 +177,12 @@ pub fn render_graph(ctx: &egui::Context, app: &mut MyApp) {
         // Brisanje veze
         if app.deleting_link {
             deleting_link::deleting_link(ui, ctx, app);
+        }
+
+
+        // Uređivanje atributa čvora
+        if app.node_editing && app.node_to_edit.is_some() {
+            editing_node::show_node_editing_dialog(ui, ctx, app);
         }
 
 

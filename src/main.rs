@@ -122,6 +122,9 @@ struct MyApp {
     second_node_selected: Option<Node>,
 
     node_editing: bool,
+    node_to_edit: Option<Node>,
+    node_to_edit_id: Option<String>,
+    node_to_edit_name: Option<String>,
 }
 
 impl MyApp {
@@ -175,6 +178,9 @@ impl Default for MyApp {
             second_node_selected: None,
 
             node_editing: false,
+            node_to_edit: None,
+            node_to_edit_id: None,
+            node_to_edit_name: None,
         }
     }
 }
