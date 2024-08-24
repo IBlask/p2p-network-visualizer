@@ -4,7 +4,7 @@ use std::{sync::{Arc, Mutex}, thread};
 use eframe::egui;
 use egui::{Color32, Pos2, Vec2};
 
-mod parser;
+mod nff_utils;
 mod api;
 mod gui_control;
 

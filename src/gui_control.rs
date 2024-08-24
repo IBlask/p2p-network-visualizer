@@ -6,7 +6,6 @@ mod deleting_link;
 mod editing_node;
 
 
-
 use crate::{MyApp, Node};
 
 use eframe::egui;
@@ -51,7 +50,35 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
 
                     ui.add_space(20.0);
 
-                    ui.add_sized(button_size, Button::new("Spremi kao datoteku"));
+                    if ui.add_sized(button_size, Button::new("Spremi kao datoteku")).clicked() {
+                        if let Some(path) = rfd::FileDialog::new()
+                            .set_title("Spremi datoteku kao")
+                            .add_filter("GraphML & GEXF", &["graphml", "gexf"])
+                            .add_filter("GraphML", &["graphml"])
+                            .add_filter("GEXF", &["gexf"])
+                            .save_file()
+                        {
+                            let provided_extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
+                            let path_with_extension = if provided_extension.is_empty() {
+                                if path.to_str().unwrap_or("").ends_with(".graphml") {
+                                    path.with_extension("graphml")
+                                } else {
+                                    path.with_extension("gexf")
+                                }
+                            } else {
+                                path
+                            };
+                            
+                            match crate::nff_utils::save_to_file(app, path_with_extension) {
+                                Ok(_) => {}
+                                Err(error_message) => {
+                                    app.show_error = true;
+                                    app.error_message = error_message;
+                                }
+                            }
+                        }
+                    }
+                    
                     if ui.add_sized(button_size, Button::new("Učitaj iz datoteke")).clicked() {
                         if let Some(path) = rfd::FileDialog::new()
                             .set_title("Učitaj iz datoteke")
@@ -61,7 +88,7 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                             .pick_file() {
                                 let path_str = path.display().to_string();
 
-                                match crate::parser::parse_file(
+                                match crate::nff_utils::parse_file(
                                     app,
                                     &mut app.nodes_arc.lock().unwrap(),
                                     &mut app.links_arc.lock().unwrap(),
