@@ -57,7 +57,7 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                             .add_filter("GraphML", &["graphml"])
                             .add_filter("GEXF", &["gexf"])
                             .save_file() {
-                            match crate::nff_utils::save_to_file(app, path_with_extension) {
+                            match crate::nff_utils::save_to_file(app, path) {
                                 Ok(_) => {}
                                 Err(error_message) => {
                                     app.show_error = true;
