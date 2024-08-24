@@ -56,19 +56,7 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                             .add_filter("GraphML & GEXF", &["graphml", "gexf"])
                             .add_filter("GraphML", &["graphml"])
                             .add_filter("GEXF", &["gexf"])
-                            .save_file()
-                        {
-                            let provided_extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
-                            let path_with_extension = if provided_extension.is_empty() {
-                                if path.to_str().unwrap_or("").ends_with(".graphml") {
-                                    path.with_extension("graphml")
-                                } else {
-                                    path.with_extension("gexf")
-                                }
-                            } else {
-                                path
-                            };
-                            
+                            .save_file() {
                             match crate::nff_utils::save_to_file(app, path_with_extension) {
                                 Ok(_) => {}
                                 Err(error_message) => {
