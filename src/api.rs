@@ -7,8 +7,6 @@ use axum::{routing::post, Router};
 use serde::Deserialize;
 use crate::State;
 
-use web_api::node_down;
-
 
 #[derive(Deserialize, Debug)]
 pub struct NodeStatus {
@@ -17,10 +15,17 @@ pub struct NodeStatus {
 
 
 pub async fn web_server(state: Arc<Mutex<State>>) {
-    let app = Router::new().route(
-        "/node_down",
-        post(move |payload| node_down(payload, state.clone())),
-    );
+    let state_for_node_down = state.clone();
+    let state_for_node_up = state.clone();
+    
+    let app = Router::new()
+        .route(
+            "/node_down", 
+            post(move |payload| web_api::node_down(payload, state_for_node_down)))
+        .route(
+            "/node_up", 
+            post(move |payload| web_api::node_up(payload, state_for_node_up)));
+
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
 

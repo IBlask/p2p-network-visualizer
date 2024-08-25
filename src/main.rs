@@ -14,7 +14,7 @@ use tokio::sync::mpsc;
 
 #[tokio::main]
 async fn main() -> Result<(), eframe::Error> {
-    let (tx, mut rx) = mpsc::channel(32);
+    let (tx, mut rx) = mpsc::channel::<(String, Color32)>(32);
     let state = Arc::new(Mutex::new(State {
         ctx: None,
         tx: Some(tx.clone()),
@@ -40,11 +40,12 @@ async fn main() -> Result<(), eframe::Error> {
             let nodes_arc = my_app.nodes_arc.clone();
             let _state = my_app._state.clone();
 
+            // primanje podataka sa API-ja
             tokio::spawn(async move {
-                while let Some(node_id) = rx.recv().await {
+                while let Some((node_id, color)) = rx.recv().await {
                     let mut nodes = nodes_arc.lock().unwrap();
                     if let Some(node) = nodes.iter_mut().find(|n| n.id == node_id) {
-                        node.color = egui::Color32::DARK_GRAY;
+                        node.color = color;
                         if let Some(ctx) = &_state.lock().unwrap().ctx {
                             ctx.request_repaint();
                         }
@@ -111,7 +112,7 @@ struct Link {
 
 struct State {
     ctx: Option<egui::Context>,
-    tx: Option<mpsc::Sender<String>>,
+    tx: Option<mpsc::Sender<(String, Color32)>>,
 }
 
 impl State {
