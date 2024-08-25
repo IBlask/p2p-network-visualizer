@@ -1,28 +1,59 @@
-extern crate tokio;
-use std::{sync::{Arc, Mutex}, thread};
-
-use eframe::egui;
-use egui::{Color32, Pos2, Vec2};
-
 mod nff_utils;
 mod api;
 mod gui_control;
 
-use api::tcp_api::tcp_connections;
+extern crate tokio;
+use std::sync::{Arc, Mutex};
+
+use eframe::egui;
+use egui::{Color32, Pos2, Vec2};
+
 use gui_control::{setup_side_panel, render_graph};
+use tokio::sync::mpsc;
 
-fn main() -> Result<(), eframe::Error> {
-    let mut my_app = MyApp::default();
 
-    let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([1280.0, 720.0]),
-        ..Default::default()
-    };
+#[tokio::main]
+async fn main() -> Result<(), eframe::Error> {
+    let (tx, mut rx) = mpsc::channel(32);
+    let state = Arc::new(Mutex::new(State {
+        ctx: None,
+        tx: Some(tx.clone()),
+    }));
+
+    let state_clone = state.clone();
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+    runtime.spawn(async move {
+        api::web_server(state_clone).await;
+    });
+
     
     eframe::run_native(
-        "Vizualizator",
-        options,
-        Box::new(move |cc| Box::new(MyApp::new(&mut my_app, cc))),
+        "Visualizer",
+        eframe::NativeOptions {
+            viewport: egui::ViewportBuilder::default().with_inner_size([1280.0, 720.0]),
+            ..Default::default()
+        },
+        Box::new(move |cc| {
+            let my_app = MyApp::new(cc);
+
+            // Obrada poruka sa web API-ja
+            let nodes_arc = my_app.nodes_arc.clone();
+            let _state = my_app._state.clone();
+
+            tokio::spawn(async move {
+                while let Some(node_id) = rx.recv().await {
+                    let mut nodes = nodes_arc.lock().unwrap();
+                    if let Some(node) = nodes.iter_mut().find(|n| n.id == node_id) {
+                        node.color = egui::Color32::DARK_GRAY;
+                        if let Some(ctx) = &_state.lock().unwrap().ctx {
+                            ctx.request_repaint();
+                        }
+                    }
+                }
+            });
+
+            Box::new(my_app)
+        }),
     )
 }
 
@@ -80,11 +111,15 @@ struct Link {
 
 struct State {
     ctx: Option<egui::Context>,
+    tx: Option<mpsc::Sender<String>>,
 }
 
 impl State {
     pub fn new() -> Self {
-        Self { ctx: None }
+        Self { 
+            ctx: None,
+            tx: None,
+        }
     }
 }
 
@@ -129,17 +164,16 @@ struct MyApp {
 }
 
 impl MyApp {
-    fn new(&mut self, cc: &eframe::CreationContext<'_>) -> Self {
+    fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let _state = Arc::new(Mutex::new(State::new()));
         _state.lock().unwrap().ctx = Some(cc.egui_ctx.clone());
         
-        let state_clone = _state.clone();
-        let nodes_arc_clone = self.nodes_arc.clone();
-        let links_arc_clone = self.links_arc.clone();
-    
-        thread::spawn(move || tcp_connections(state_clone, nodes_arc_clone, links_arc_clone));
-        
-        MyApp::default()
+        Self {
+            _state,
+            nodes_arc: Arc::new(Mutex::new(Vec::new())),
+            links_arc: Arc::new(Mutex::new(Vec::new())),
+            ..Default::default()
+        }
     }
 }
 
