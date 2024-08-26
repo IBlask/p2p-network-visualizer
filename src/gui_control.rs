@@ -76,13 +76,22 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                             .pick_file() {
                                 let path_str = path.display().to_string();
 
-                                match crate::nff_utils::parse_file(
-                                    app,
-                                    &mut app.nodes_arc.lock().unwrap(),
-                                    &mut app.links_arc.lock().unwrap(),
-                                    &path_str,
-                                ) {
+                                let parse_result = {
+                                    let mut nodes = app.nodes_arc.lock().unwrap();
+                                    let mut links = app.links_arc.lock().unwrap();
+
+                                    crate::nff_utils::parse_file(app, &mut nodes, &mut links, &path_str)
+                                };
+
+                                match parse_result {
                                     Ok(_success) => {
+                                        let mut nodes = app.nodes_arc.lock().unwrap();
+                                        if nodes.iter().any(|n| n.center.x < app.left_side_panel_width) {
+                                            for n in nodes.iter_mut() {
+                                                n.center.x += app.left_side_panel_width;
+                                            }
+                                        }
+                                        
                                         app.zoom = 1.0;
                                         app.mouse_drag_delta = Vec2::default();
                                     }
