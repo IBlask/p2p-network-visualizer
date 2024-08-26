@@ -9,7 +9,7 @@ mod editing_node;
 use crate::{MyApp, Node};
 
 use eframe::egui;
-use egui::{Button, Color32};
+use egui::{Button, Color32, Vec2};
 
 
 pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
@@ -82,7 +82,10 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                                     &mut app.links_arc.lock().unwrap(),
                                     &path_str,
                                 ) {
-                                    Ok(_success) => {}
+                                    Ok(_success) => {
+                                        app.zoom = 1.0;
+                                        app.mouse_drag_delta = Vec2::default();
+                                    }
                                     Err(error_message) => {
                                         app.show_error = true;
                                         app.error_message = error_message;
