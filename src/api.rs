@@ -50,7 +50,7 @@ pub async fn web_server(state: Arc<Mutex<State>>) {
             post(move |payload| node_attributes_update(payload, state_for_node_update)));
 
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8020));
 
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
