@@ -1,16 +1,20 @@
-mod tcp_api;
 mod web_api;
 
-
 use std::{net::SocketAddr, sync::{Arc, Mutex}};
-use axum::{routing::post, Router};
-use serde::Deserialize;
+use axum::{routing::post, Json, Router};
+use serde::{Deserialize, Serialize};
 use crate::State;
 
 
 #[derive(Deserialize, Debug)]
 pub struct NodeStatus {
     node_id: String,
+}
+
+#[derive(Serialize, Debug)]
+pub struct ApiResponse {
+    pub success: bool,
+    pub message: String,
 }
 
 
@@ -33,4 +37,9 @@ pub async fn web_server(state: Arc<Mutex<State>>) {
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+
+async fn respond_with(response: ApiResponse) -> Json<ApiResponse> {
+    Json(response)
 }

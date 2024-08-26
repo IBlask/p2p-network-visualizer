@@ -5,16 +5,17 @@ mod gui_control;
 extern crate tokio;
 use std::sync::{Arc, Mutex};
 
+use api::ApiResponse;
 use eframe::egui;
 use egui::{Color32, Pos2, Vec2};
 
 use gui_control::{setup_side_panel, render_graph};
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, oneshot};
 
 
 #[tokio::main]
 async fn main() -> Result<(), eframe::Error> {
-    let (tx, mut rx) = mpsc::channel::<(String, Color32)>(32);
+    let (tx, mut rx) = mpsc::channel::<(String, Color32, oneshot::Sender<ApiResponse>)>(32);
     let state = Arc::new(Mutex::new(State {
         ctx: None,
         tx: Some(tx.clone()),
@@ -38,17 +39,21 @@ async fn main() -> Result<(), eframe::Error> {
 
             // Obrada poruka sa web API-ja
             let nodes_arc = my_app.nodes_arc.clone();
-            let _state = my_app._state.clone();
+            let state_clone = my_app._state.clone();
 
             // primanje podataka sa API-ja
             tokio::spawn(async move {
-                while let Some((node_id, color)) = rx.recv().await {
+                while let Some((node_id, color, resp_tx)) = rx.recv().await {
                     let mut nodes = nodes_arc.lock().unwrap();
+                    
                     if let Some(node) = nodes.iter_mut().find(|n| n.id == node_id) {
                         node.color = color;
-                        if let Some(ctx) = &_state.lock().unwrap().ctx {
+                        if let Some(ctx) = &state_clone.lock().unwrap().ctx {
                             ctx.request_repaint();
                         }
+                        let _ = resp_tx.send(ApiResponse { success: true, message: "OK".to_string()});
+                    } else {
+                        let _ = resp_tx.send(ApiResponse { success: false, message: "Čvor nije pronađen".to_string() });
                     }
                 }
             });
@@ -112,7 +117,7 @@ struct Link {
 
 struct State {
     ctx: Option<egui::Context>,
-    tx: Option<mpsc::Sender<(String, Color32)>>,
+    tx: Option<mpsc::Sender<(String, Color32, oneshot::Sender<ApiResponse>)>>,
 }
 
 impl State {
