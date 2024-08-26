@@ -64,7 +64,8 @@ pub fn show_node_editing_dialog(ui: &Ui, ctx: &egui::Context, app: &mut MyApp) {
             ui.horizontal(|ui| {
                 if ui.button("OK").clicked() {
                     if !id_exists {
-                    
+                        node.center = (node.center - app.mouse_drag_delta) / app.zoom;   // kompenzacija za zoom i drag
+                        
                         let mut nodes = app.nodes_arc.lock().unwrap();
                         for n in &mut *nodes {
                             if n.id == node.id {
