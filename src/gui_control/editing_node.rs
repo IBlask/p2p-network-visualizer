@@ -1,6 +1,6 @@
 use egui::{Color32, Ui};
 
-use crate::MyApp;
+use crate::models::MyApp;
 
 pub fn show_node_editing_dialog(ui: &Ui, ctx: &egui::Context, app: &mut MyApp) {
     let mut node = app.node_to_edit.clone().unwrap();

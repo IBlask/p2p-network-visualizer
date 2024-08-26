@@ -6,7 +6,7 @@ mod deleting_link;
 mod editing_node;
 
 
-use crate::{MyApp, Node};
+use crate::models::{MyApp, Node};
 
 use eframe::egui;
 use egui::{Button, Color32, Vec2};

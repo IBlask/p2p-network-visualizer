@@ -6,7 +6,7 @@ mod gexf_saver;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
-use crate::{Link, MyApp, Node};
+use crate::models::{Link, MyApp, Node};
 
 
 pub fn parse_file(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec<Link>, file_path: &str) -> Result<bool, String> {

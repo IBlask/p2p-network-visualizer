@@ -1,4 +1,4 @@
-use crate::{Link, MyApp, Node};
+use crate::models::{Link, MyApp, Node};
 
 use egui::Color32;
 

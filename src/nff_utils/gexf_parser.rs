@@ -4,7 +4,7 @@ use std::io::BufReader;
 
 use xml::reader::{EventReader, XmlEvent};
 
-use crate::{Link, MyApp, Node};
+use crate::models::{Link, MyApp, Node};
 
 fn scale_float_to_int(value: f32) -> i32 {
     (value * 1000.0).round() as i32

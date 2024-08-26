@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 use axum::Json;
 use tokio::sync::oneshot;
-use crate::State;
+use crate::models::State;
 
 use super::{respond_with, ApiResponse, UpdateNodeRequest};
 

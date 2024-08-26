@@ -1,4 +1,4 @@
-use crate::MyApp;
+use crate::models::MyApp;
 
 use egui::{Color32, Ui};
 

@@ -1,7 +1,7 @@
 use axum::Json;
 use tokio::sync::oneshot;
 use std::sync::{Arc, Mutex};
-use crate::State;
+use crate::models::State;
 use egui::Color32;
 
 use super::{respond_with, ApiResponse, UpdateNodeRequest};

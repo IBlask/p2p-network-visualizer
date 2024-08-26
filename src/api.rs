@@ -8,7 +8,7 @@ use std::{net::SocketAddr, sync::{Arc, Mutex}};
 use axum::{routing::post, Json, Router};
 use egui::Color32;
 use serde::{Deserialize, Serialize};
-use crate::{Node, State};
+use crate::models::{Node, State};
 
 
 #[derive(Deserialize, Debug)]

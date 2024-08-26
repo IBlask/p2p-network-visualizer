@@ -1,4 +1,4 @@
-use crate::{MyApp, Node};
+use crate::models::{MyApp, Node};
 
 use egui::{Color32, Pos2, Ui};
 
