@@ -2,11 +2,13 @@ use crate::{MyApp, Node};
 
 use egui::{Color32, Pos2, Ui};
 
+use super::painter::scale_pos;
+
 
 pub fn adding_node(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2) {
     ui.painter().circle_filled(mouse_pos, app.node_default_radius, Color32::LIGHT_BLUE); 
     if ctx.input(|i| i.pointer.primary_clicked()) {
-        app.new_node_pos = mouse_pos;
+        app.new_node_pos = (mouse_pos - app.mouse_drag_delta) / app.zoom;
         app.show_input_dialog = true;
         app.adding_node = false; 
     }
@@ -14,7 +16,7 @@ pub fn adding_node(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos
 
 
 pub fn show_input_dialog(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, nodes: &Vec<Node>) {
-    ui.painter().circle_filled(app.new_node_pos, app.node_default_radius, Color32::LIGHT_BLUE);
+    ui.painter().circle_filled(scale_pos(app.new_node_pos, app), app.node_default_radius, Color32::LIGHT_BLUE);
 
     egui::Window::new("Detalji novog čvora")
         .collapsible(true)

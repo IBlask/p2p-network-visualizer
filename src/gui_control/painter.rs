@@ -133,7 +133,7 @@ pub fn show_popup(ui: &egui::Ui, ctx: &egui::Context, pos: egui::Pos2, app: &MyA
 
 
 
-fn scale_pos(pos: Pos2, app: &MyApp) -> Pos2 {
+pub fn scale_pos(pos: Pos2, app: &MyApp) -> Pos2 {
     Pos2 {
         x: pos.x * app.zoom + app.mouse_drag_delta.x,
         y: pos.y * app.zoom + app.mouse_drag_delta.y,
