@@ -66,12 +66,24 @@ pub fn show_node_editing_dialog(ui: &Ui, ctx: &egui::Context, app: &mut MyApp) {
                     if !id_exists {
                         node.center = (node.center - app.mouse_drag_delta) / app.zoom;   // kompenzacija za zoom i drag
                         
+                        let node_to_edit_id = app.node_to_edit_id.clone().unwrap();
                         let mut nodes = app.nodes_arc.lock().unwrap();
                         for n in &mut *nodes {
-                            if n.id == node.id {
+                            if n.id == node_to_edit_id {
                                 *n = node.clone();
                                 break;
                             }
+                        }
+                        if node.id != node_to_edit_id {
+                            let mut links = app.links_arc.lock().unwrap();
+                            links.iter_mut().for_each(|l| {
+                                if l.node1_id == node_to_edit_id {
+                                    l.node1_id = node.id.clone();
+                                }
+                                if l.node2_id == node_to_edit_id {
+                                    l.node2_id = node.id.clone();
+                                }
+                            })
                         }
                     }
                     app.node_editing = false;
