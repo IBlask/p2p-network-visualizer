@@ -3,19 +3,19 @@ mod api;
 mod gui_control;
 
 extern crate tokio;
+use tokio::sync::{mpsc, oneshot};
 use std::sync::{Arc, Mutex};
-
-use api::ApiResponse;
 use eframe::egui;
 use egui::{Color32, Pos2, Vec2};
 
 use gui_control::{setup_side_panel, render_graph};
-use tokio::sync::{mpsc, oneshot};
+use api::ApiResponse;
+
 
 
 #[tokio::main]
 async fn main() -> Result<(), eframe::Error> {
-    let (tx, mut rx) = mpsc::channel::<(String, Color32, oneshot::Sender<ApiResponse>)>(32);
+    let (tx, mut rx) = mpsc::channel::<(api::UpdateNodeRequest, oneshot::Sender<ApiResponse>)>(32);
     let state = Arc::new(Mutex::new(State {
         ctx: None,
         tx: Some(tx.clone()),
@@ -35,19 +35,21 @@ async fn main() -> Result<(), eframe::Error> {
             ..Default::default()
         },
         Box::new(move |cc| {
-            let my_app = MyApp::new(cc);
+            // Inicijalizacija applikacije
+            let app = MyApp::new(cc);
 
             // Obrada poruka sa web API-ja
-            let nodes_arc = my_app.nodes_arc.clone();
-            let state_clone = my_app._state.clone();
+            let nodes_arc = app.nodes_arc.clone();
+            let state_clone = app._state.clone();
 
             // primanje podataka sa API-ja
             tokio::spawn(async move {
-                while let Some((node_id, color, resp_tx)) = rx.recv().await {
+                while let Some((update_node_request, resp_tx)) = rx.recv().await {
                     let mut nodes = nodes_arc.lock().unwrap();
                     
-                    if let Some(node) = nodes.iter_mut().find(|n| n.id == node_id) {
-                        node.color = color;
+                    if let Some(node) = nodes.iter_mut().find(|n| n.id == update_node_request.node_id) {
+                        api::update_node(node, update_node_request);
+
                         if let Some(ctx) = &state_clone.lock().unwrap().ctx {
                             ctx.request_repaint();
                         }
@@ -58,10 +60,12 @@ async fn main() -> Result<(), eframe::Error> {
                 }
             });
 
-            Box::new(my_app)
+            Box::new(app)
         }),
     )
 }
+
+
 
 #[derive(Clone)]
 struct Node {
@@ -78,7 +82,6 @@ struct Node {
     network_bw: String,
     software: String,
 }
-
 impl Node {
     fn new() -> Self {
         Self {
@@ -115,11 +118,11 @@ struct Link {
     node2_id: String,
 }
 
+
 struct State {
     ctx: Option<egui::Context>,
-    tx: Option<mpsc::Sender<(String, Color32, oneshot::Sender<ApiResponse>)>>,
+    tx: Option<mpsc::Sender<(api::UpdateNodeRequest, oneshot::Sender<ApiResponse>)>>,
 }
-
 impl State {
     pub fn new() -> Self {
         Self { 
@@ -128,6 +131,7 @@ impl State {
         }
     }
 }
+
 
 struct MyApp {
     _state: Arc<Mutex<State>>,
