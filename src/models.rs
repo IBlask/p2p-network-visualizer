@@ -1,10 +1,12 @@
 use std::sync::{Arc, Mutex};
 use egui::{Color32, Pos2, Vec2};
+use serde::Deserialize;
 use tokio::sync::mpsc;
 
 
-pub(crate) struct MyApp {
-    pub(crate) _state: Arc<Mutex<State>>,
+#[derive(Clone)]
+pub struct MyApp {
+    pub(crate) state: Arc<Mutex<State>>,
     pub(crate) nodes_arc: Arc<Mutex<Vec<Node>>>,
     pub(crate) links_arc: Arc<Mutex<Vec<Link>>>,
 
@@ -44,23 +46,27 @@ pub(crate) struct MyApp {
 }
 
 impl MyApp {
-    pub(crate) fn new(cc: &eframe::CreationContext<'_>) -> Self {
-        let _state = Arc::new(Mutex::new(State::new()));
-        _state.lock().unwrap().ctx = Some(cc.egui_ctx.clone());
+    pub(crate) fn new() -> Self {
+        let state = Arc::new(Mutex::new(State::new()));
         
         Self {
-            _state,
+            state,
             nodes_arc: Arc::new(Mutex::new(Vec::new())),
             links_arc: Arc::new(Mutex::new(Vec::new())),
             ..Default::default()
         }
+    }
+
+    pub(crate) fn set_ctx(&mut self, cc: &eframe::CreationContext<'_>) -> &mut Self {
+        self.state.lock().unwrap().ctx = Some(cc.egui_ctx.clone());
+        self
     }
 }
 
 impl Default for MyApp {
     fn default() -> Self {
         Self {
-            _state: Arc::new(Mutex::new(State::new())),
+            state: Arc::new(Mutex::new(State::new())),
             nodes_arc: Arc::new(Mutex::new(Vec::new())),
             links_arc: Arc::new(Mutex::new(Vec::new())),
 
@@ -106,7 +112,7 @@ impl Default for MyApp {
 
 pub(crate) struct State {
     pub(crate) ctx: Option<egui::Context>,
-    pub(crate) tx: Option<mpsc::Sender<(crate::api::UpdateNodeRequest, tokio::sync::oneshot::Sender<crate::api::ApiResponse>)>>,
+    pub(crate) tx: Option<mpsc::Sender<(crate::models::UpdateNodeRequest, tokio::sync::oneshot::Sender<crate::api::ApiResponse>)>>,
 }
 
 impl State {
@@ -122,19 +128,19 @@ impl State {
 
 
 #[derive(Clone)]
-pub(crate) struct Node {
-    pub(crate) id: String,
-    pub(crate) name: String,
+pub struct Node {
+    pub id: String,
+    pub name: String,
     pub(crate) center: egui::Pos2,
     pub(crate) radius: f32,
     pub(crate) color: Color32,
-    pub(crate) ip_addr: String,
-    pub(crate) cpu: String,
-    pub(crate) ram: String,
-    pub(crate) rom: String,
-    pub(crate) os: String,
-    pub(crate) network_bw: String,
-    pub(crate) software: String,
+    pub ip_addr: String,
+    pub cpu: String,
+    pub ram: String,
+    pub rom: String,
+    pub os: String,
+    pub network_bw: String,
+    pub software: String,
 }
 
 impl Node {
@@ -173,4 +179,39 @@ impl Node {
 pub(crate) struct Link {
     pub(crate) node1_id: String,
     pub(crate) node2_id: String,
+}
+
+
+
+
+#[derive(Deserialize, Debug)]
+pub struct UpdateNodeRequest {
+    pub node_id: String,
+    pub name: Option<String>,
+    #[serde(skip_deserializing)]
+    pub color: Option<Color32>,
+    pub ip_addr: Option<String>,
+    pub cpu: Option<String>,
+    pub ram: Option<String>,
+    pub rom: Option<String>,
+    pub os: Option<String>,
+    pub network_bw: Option<String>,
+    pub software: Option<String>,
+}
+
+impl Default for UpdateNodeRequest {
+    fn default() -> Self {
+        Self {
+            node_id: String::default(),
+            name: None,
+            color: None,
+            ip_addr: None,
+            cpu: None,
+            ram: None,
+            rom: None,
+            os: None,
+            network_bw: None,
+            software: None,
+        }
+    }
 }

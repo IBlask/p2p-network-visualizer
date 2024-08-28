@@ -1,3 +1,6 @@
+use p2p_network_visualizer::init_visualizer;
+
+
 fn main() {
-    let _ = p2p_network_visualizer::start_visualizer();
+    let _ = init_visualizer().start_visualizer();
 }

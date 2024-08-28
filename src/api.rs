@@ -6,25 +6,9 @@ use node_attributes_api::node_attributes_update;
 
 use std::{net::SocketAddr, sync::{Arc, Mutex}};
 use axum::{routing::post, Json, Router};
-use egui::Color32;
-use serde::{Deserialize, Serialize};
-use crate::models::{Node, State};
+use serde::Serialize;
+use crate::models::{Node, State, UpdateNodeRequest};
 
-
-#[derive(Deserialize, Debug)]
-pub struct UpdateNodeRequest {
-    pub node_id: String,
-    pub name: Option<String>,
-    #[serde(skip_deserializing)]
-    pub color: Option<Color32>,
-    pub ip_addr: Option<String>,
-    pub cpu: Option<String>,
-    pub ram: Option<String>,
-    pub rom: Option<String>,
-    pub os: Option<String>,
-    pub network_bw: Option<String>,
-    pub software: Option<String>,
-}
 
 #[derive(Serialize, Debug)]
 pub struct ApiResponse {
