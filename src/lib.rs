@@ -44,7 +44,7 @@ impl MyApp {
             },
             Box::new(move |cc| {
                 // Inicijalizacija context-a
-                self.set_ctx(cc);
+                self.set_ctx(cc).set_dark_theme();
                 
                 // Obrada poruka sa web API-ja
                 let nodes_arc = self.nodes_arc.clone();

@@ -1,5 +1,5 @@
 use std::sync::{Arc, Mutex};
-use egui::{Color32, Pos2, Vec2};
+use egui::{Color32, Pos2, Vec2, Visuals};
 use serde::Deserialize;
 use tokio::sync::mpsc;
 
@@ -59,6 +59,14 @@ impl MyApp {
 
     pub(crate) fn set_ctx(&mut self, cc: &eframe::CreationContext<'_>) -> &mut Self {
         self.state.lock().unwrap().ctx = Some(cc.egui_ctx.clone());
+        self
+    }
+
+    pub(crate) fn set_dark_theme(&mut self) -> &mut Self {
+        let ctx = self.state.lock().unwrap().ctx.clone();
+        if ctx.is_some() {
+            ctx.unwrap().set_visuals(Visuals::dark());
+        }
         self
     }
 }
