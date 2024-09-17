@@ -14,7 +14,7 @@ pub fn draw_links(ui: &Ui, app: &MyApp, nodes: &Vec<Node>, links: &Vec<Link>) {
                     scale_pos(tmp_vec.get(0).unwrap().center, app),
                     scale_pos(tmp_vec.get(1).unwrap().center, app),
                 ],
-                egui::Stroke::new(1.0, egui::Color32::WHITE),
+                egui::Stroke::new(1.0, app.default_node_color),
             );
         }
     }
@@ -25,6 +25,12 @@ pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2
     for node in &mut *nodes {
         node.center = scale_pos(node.center, app);
 
+        if node.color == Color32::WHITE {
+            node.color = app.default_node_color;
+        }
+        else {
+            node.color = app.offline_node_color;
+        }
         ui.painter().circle_filled(node.center, node.radius, node.color);
 
         // Prikazivanje naziva iznad čvora ako je checkbox označen
@@ -34,7 +40,7 @@ pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2
                 egui::Align2::CENTER_CENTER,
                 &node.name,
                 egui::FontId::proportional(14.0),
-                egui::Color32::WHITE,
+                app.default_node_color,
             );
         }
 

@@ -6,7 +6,6 @@ mod gui_control;
 extern crate tokio;
 use crate::models::UpdateNodeRequest;
 use api::ApiResponse;
-use egui::Color32;
 use models::{Link, MyApp, Node, State};
 use tokio::sync::{mpsc, oneshot};
 use std::{borrow::BorrowMut, sync::{Arc, Mutex}};
@@ -44,7 +43,7 @@ impl MyApp {
             },
             Box::new(move |cc| {
                 // Inicijalizacija context-a
-                self.set_ctx(cc).set_dark_theme();
+                self.set_ctx(cc);
                 
                 // Obrada poruka sa web API-ja
                 let nodes_arc = self.nodes_arc.clone();
@@ -56,7 +55,7 @@ impl MyApp {
                         let mut nodes = nodes_arc.lock().unwrap();
                         
                         if let Some(node) = nodes.iter_mut().find(|n| n.id == update_node_request.node_id) {
-                            api::update_node(node, update_node_request);
+                            api::update_node(node, update_node_request, self.default_node_color, self.offline_node_color);
 
                             if let Some(ctx) = &state_clone.lock().unwrap().ctx {
                                 ctx.request_repaint();
@@ -93,7 +92,7 @@ impl MyApp {
         let mut nodes = self.nodes_arc.lock().unwrap();
         let node = nodes.iter_mut().find(|n| n.id == node_id);
         if node.is_some() {
-            node.unwrap().color = Color32::DARK_GRAY;
+            node.unwrap().color = self.offline_node_color;
             self.repaint();
             Ok(())
         }
@@ -106,7 +105,7 @@ impl MyApp {
         let mut nodes = self.nodes_arc.lock().unwrap();
         let node = nodes.iter_mut().find(|n| n.id == node_id);
         if node.is_some() {
-            node.unwrap().color = Color32::WHITE;
+            node.unwrap().color = self.default_node_color;
             self.repaint();
             Ok(())
         }
@@ -116,14 +115,14 @@ impl MyApp {
     }
 
     pub fn change_node_attributes(&self, update_node_request: UpdateNodeRequest) -> Result<(), String> {
-        if update_node_request.color.is_some() {
-            return Err("Nije moguće mijenjati boju čvora".to_string());
+        if update_node_request.status.is_some() {
+            return Err("Nije moguće mijenjati boju/status čvora".to_string());
         }
 
         let mut nodes = self.nodes_arc.lock().unwrap();
         let node = nodes.iter_mut().find(|n| n.id == update_node_request.node_id);
         if node.is_some() {
-            api::update_node(node.unwrap().borrow_mut(), update_node_request);
+            api::update_node(node.unwrap().borrow_mut(), update_node_request, self.default_node_color, self.offline_node_color);
             self.repaint();
             Ok(())
         }

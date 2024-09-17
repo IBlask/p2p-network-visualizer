@@ -18,7 +18,7 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
         .fixed_pos(egui::pos2(0.0, 0.0))
         .show(ctx, |ui| {
             egui::Frame::default()
-                .fill(egui::Color32::from_rgb(40, 40, 40))
+                .fill(app.left_side_panel_color)
                 .show(ui, |ui| {
                     ui.set_width(app.left_side_panel_width);
                     ui.set_height(ui.available_height());
@@ -106,6 +106,24 @@ pub fn setup_side_panel(ctx: &egui::Context, app: &mut MyApp) {
                     ui.add_space(40.0);
 
                     ui.checkbox(&mut app.show_node_names, "Prikaži nazive čvorova");
+
+                    ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
+                        let default_node_color = app.default_node_color;
+                        let button_text = if default_node_color == Color32::WHITE {
+                            "Svijetla tema"
+                        } else {
+                            "Tamna tema"
+                        };
+
+                        if ui.add_sized(button_size, Button::new(button_text)).clicked() {
+                            if default_node_color == Color32::WHITE {
+                                app.set_light_theme();
+                            }
+                            else {
+                                app.set_dark_theme();
+                            }
+                        }
+                    });
                 
                 });
         });

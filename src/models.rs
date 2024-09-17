@@ -11,6 +11,9 @@ pub struct MyApp {
     pub(crate) links_arc: Arc<Mutex<Vec<Link>>>,
 
     pub(crate) left_side_panel_width: f32,
+    pub(crate) left_side_panel_color: Color32,
+    pub(crate) default_node_color: Color32,
+    pub(crate) offline_node_color: Color32,
 
     pub(crate) dragging: bool,
     pub(crate) dragged_node_id: Option<String>,
@@ -66,6 +69,20 @@ impl MyApp {
         let ctx = self.state.lock().unwrap().ctx.clone();
         if ctx.is_some() {
             ctx.unwrap().set_visuals(Visuals::dark());
+            self.left_side_panel_color = Color32::from_rgb(40, 40, 40);
+            self.default_node_color = Color32::WHITE;
+            self.offline_node_color = Color32::DARK_GRAY;
+        }
+        self
+    }
+
+    pub(crate) fn set_light_theme(&mut self) -> &mut Self {
+        let ctx = self.state.lock().unwrap().ctx.clone();
+        if ctx.is_some() {
+            ctx.as_ref().unwrap().set_visuals(Visuals::light());
+            self.left_side_panel_color = Color32::from_rgb(200, 200, 200);
+            self.default_node_color = Color32::BLACK;
+            self.offline_node_color = Color32::LIGHT_GRAY;
         }
         self
     }
@@ -79,6 +96,9 @@ impl Default for MyApp {
             links_arc: Arc::new(Mutex::new(Vec::new())),
 
             left_side_panel_width: 180.0,
+            left_side_panel_color: Color32::from_rgb(40, 40, 40),
+            default_node_color: Color32::WHITE,
+            offline_node_color: Color32::DARK_GRAY,
 
             dragging: false,
             dragged_node_id: None,
@@ -197,7 +217,7 @@ pub struct UpdateNodeRequest {
     pub node_id: String,
     pub name: Option<String>,
     #[serde(skip_deserializing)]
-    pub color: Option<Color32>,
+    pub status: Option<bool>,
     pub ip_addr: Option<String>,
     pub cpu: Option<String>,
     pub ram: Option<String>,
@@ -212,7 +232,7 @@ impl Default for UpdateNodeRequest {
         Self {
             node_id: String::default(),
             name: None,
-            color: None,
+            status: None,
             ip_addr: None,
             cpu: None,
             ram: None,
