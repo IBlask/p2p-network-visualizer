@@ -1,7 +1,6 @@
 mod node_status_api;
 mod node_attributes_api;
 
-use egui::Color32;
 use node_status_api::{node_down, node_up};
 use node_attributes_api::node_attributes_update;
 
@@ -52,14 +51,9 @@ async fn respond_with(response: ApiResponse) -> Json<ApiResponse> {
 
 
 
-pub fn update_node(node: &mut Node, update_request: UpdateNodeRequest, online_color: Color32, offline_color: Color32) {
+pub fn update_node(node: &mut Node, update_request: UpdateNodeRequest) {
     if update_request.status.is_some() {
-        if update_request.status.unwrap() == true {
-            node.color = online_color;
-        }
-        else if update_request.status.unwrap() == false {
-            node.color = offline_color;
-        }
+        node.is_online = update_request.status.unwrap();
     }
     else {
         if let Some(name) = update_request.name {

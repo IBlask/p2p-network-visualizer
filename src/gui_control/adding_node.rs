@@ -71,7 +71,7 @@ pub fn show_input_dialog(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, nodes: &
                     if !app.new_node.id.is_empty() && !app.new_node.name.is_empty() && !id_exists {
                         app.new_node.set_pos(app.new_node_pos)
                                     .set_radius(app.node_default_radius);
-                        app.new_node.color = Color32::WHITE;
+                        app.new_node.is_online = true;
 
                         if let Ok(mut nodes_lock) = app.nodes_arc.lock() {
                             

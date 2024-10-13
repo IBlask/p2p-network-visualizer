@@ -23,15 +23,16 @@ pub fn draw_links(ui: &Ui, app: &MyApp, nodes: &Vec<Node>, links: &Vec<Link>) {
 
 pub fn draw_nodes(ui: &Ui, ctx: &egui::Context, app: &mut MyApp, mouse_pos: Pos2, nodes: &mut Vec<Node>) {
     for node in &mut *nodes {
+        let node_color: Color32;
         node.center = scale_pos(node.center, app);
 
-        if node.color == Color32::WHITE {
-            node.color = app.default_node_color;
+        if node.is_online {
+            node_color = app.default_node_color;
         }
         else {
-            node.color = app.offline_node_color;
+            node_color = app.offline_node_color;
         }
-        ui.painter().circle_filled(node.center, node.radius, node.color);
+        ui.painter().circle_filled(node.center, node.radius, node_color);
 
         // Prikazivanje naziva iznad čvora ako je checkbox označen
         if app.show_node_names {

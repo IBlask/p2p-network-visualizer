@@ -94,7 +94,6 @@ pub fn parse_gexf(app: &MyApp, nodes_arc: &mut Vec<Node>, links_arc: &mut Vec<Li
             Ok(XmlEvent::EndElement { name }) => {
                 if name.local_name == "node" {
                     new_node.radius = app.node_default_radius;
-                    new_node.color = egui::Color32::WHITE;
 
                     if new_node.center.x == 0.0 && new_node.center.y == 0.0 {
                         nodes_without_pos.push(new_node.id.clone());

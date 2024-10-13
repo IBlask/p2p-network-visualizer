@@ -55,7 +55,7 @@ impl MyApp {
                         let mut nodes = nodes_arc.lock().unwrap();
                         
                         if let Some(node) = nodes.iter_mut().find(|n| n.id == update_node_request.node_id) {
-                            api::update_node(node, update_node_request, self.default_node_color, self.offline_node_color);
+                            api::update_node(node, update_node_request);
 
                             if let Some(ctx) = &state_clone.lock().unwrap().ctx {
                                 ctx.request_repaint();
@@ -92,7 +92,7 @@ impl MyApp {
         let mut nodes = self.nodes_arc.lock().unwrap();
         let node = nodes.iter_mut().find(|n| n.id == node_id);
         if node.is_some() {
-            node.unwrap().color = self.offline_node_color;
+            node.unwrap().is_online = false;
             self.repaint();
             Ok(())
         }
@@ -105,7 +105,7 @@ impl MyApp {
         let mut nodes = self.nodes_arc.lock().unwrap();
         let node = nodes.iter_mut().find(|n| n.id == node_id);
         if node.is_some() {
-            node.unwrap().color = self.default_node_color;
+            node.unwrap().is_online = true;
             self.repaint();
             Ok(())
         }
@@ -122,7 +122,7 @@ impl MyApp {
         let mut nodes = self.nodes_arc.lock().unwrap();
         let node = nodes.iter_mut().find(|n| n.id == update_node_request.node_id);
         if node.is_some() {
-            api::update_node(node.unwrap().borrow_mut(), update_node_request, self.default_node_color, self.offline_node_color);
+            api::update_node(node.unwrap().borrow_mut(), update_node_request);
             self.repaint();
             Ok(())
         }
